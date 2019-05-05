@@ -56,7 +56,9 @@ if(NOT FairMQInFairRoot_FOUND) # DEPRECATED: Remove this condition, once we requ
   find_package(FairLogger REQUIRED)
 endif()
 find_package(DDS)
-find_package(Protobuf REQUIRED)
+cmake_policy(SET CMP0077 NEW)
+set(protobuf_MODULE_COMPATIBLE TRUE)
+find_package(protobuf CONFIG REQUIRED)
 find_package(InfoLogger REQUIRED)
 find_package(Configuration REQUIRED)
 find_package(Monitoring REQUIRED)
@@ -475,7 +477,7 @@ o2_define_bucket(
     common_boost_bucket
     fairmq_bucket
     Base FairTools Core MathCore Matrix Minuit Hist Geom GenVector RIO
-    AliTPCCommonBase_bucket
+    GPUCommon_bucket
 
     INCLUDE_DIRECTORIES
     ${FAIRROOT_INCLUDE_DIR}
@@ -518,7 +520,7 @@ o2_define_bucket(
     dl
     common_boost_bucket
     Boost::filesystem
-    ${PROTOBUF_LIBRARY}
+    protobuf::libprotobuf
     Base
     FairTools
     ParBase
@@ -532,6 +534,7 @@ o2_define_bucket(
     ${FAIRROOT_INCLUDE_DIR}
     ${ROOT_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/Common/Utils/include
+    ${CMAKE_SOURCE_DIR}/Utilities/O2Device/include
 
     SYSTEMINCLUDE_DIRECTORIES
     ${PROTOBUF_INCLUDE_DIR}
@@ -628,7 +631,7 @@ o2_define_bucket(
     DetectorsBase
     RIO
     SimConfig
-    AliTPCCommonBase_bucket
+    GPUCommon_bucket
 
     INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/Common/MathUtils/include
@@ -682,6 +685,7 @@ o2_define_bucket(
     data_format_detectors_common_bucket
     DetectorsCommonDataFormats
     CommonDataFormat
+    GPUCommon_bucket
 
     INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/Common/MathUtils/include
@@ -905,7 +909,7 @@ o2_define_bucket(
 
     DEPENDENCIES
     data_format_its_bucket
-    AliTPCCommonBase_bucket
+    GPUCommon_bucket
     #
     DataFormatsITS
     DetectorsBase
@@ -948,25 +952,6 @@ o2_define_bucket(
     ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/workflow/include
     ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/reconstruction/include
     ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/tracking/include
-)
-
-
-o2_define_bucket(
-    NAME
-    ITS_RawPixel_bucket
-
-    DEPENDENCIES
-    Framework
-    its_reconstruction_bucket
-    ITSReconstruction
-    ITStracking
-
-    INCLUDE_DIRECTORIES
-    ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/RawPixelReaderWorkflow/include
-    ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/reconstruction/include
-    ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/tracking/include
-    ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/common/base/include
-
 )
 
 o2_define_bucket(
@@ -1105,7 +1090,7 @@ o2_define_bucket(
     Gen
     Base
     TreePlayer
-    O2TPCCAGPUTracking
+    O2GPUTracking
     O2TPCFastTransformation
     TPCSimulation
     #the dependency on TPCSimulation should be removed at some point
@@ -1125,8 +1110,6 @@ o2_define_bucket(
     ${CMAKE_SOURCE_DIR}/DataFormats/Headers/include
     ${MS_GSL_INCLUDE_DIR}
 )
-
-include("${ALITPCCOMMON_DIR}/sources/cmake/O2Dependencies.cmake")
 
 o2_define_bucket(
     NAME
@@ -1169,6 +1152,8 @@ o2_define_bucket(
     ${CMAKE_SOURCE_DIR}/DataFormats/Headers/include
     ${Vc_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
+    ${FAIRROOT_INCLUDE_DIR}
+    ${FairLogger_INCDIR}
 )
 
 o2_define_bucket(
@@ -1339,7 +1324,7 @@ o2_define_bucket(
     CommonDataFormat
     data_format_detectors_common_bucket
     DetectorsCommonDataFormats
-    AliTPCCommonBase_bucket
+    GPUCommon_bucket
 
     INCLUDE_DIRECTORIES
     ${FAIRROOT_INCLUDE_DIR}
@@ -2197,7 +2182,7 @@ o2_define_bucket(
     tpc_base_bucket
     tpc_reconstruction_bucket
     tof_base_bucket
-    TPCCAGPUTracking_bucket
+    GPUTracking_bucket
     data_parameters_bucket
     common_utils_bucket
     common_math_bucket
@@ -2218,7 +2203,7 @@ o2_define_bucket(
     CommonUtils
     MathUtils
     Field
-    O2TPCCAGPUTracking
+    O2GPUTracking
     O2TPCFastTransformation
     RIO
     Core
@@ -2240,6 +2225,10 @@ o2_define_bucket(
     ${CMAKE_SOURCE_DIR}/Common/Constants/include
     ${CMAKE_SOURCE_DIR}/DataFormats/Parameters/include
     ${CMAKE_SOURCE_DIR}/DataFormats/Detectors/TPC/include
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Base
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Interface
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Merger
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/SliceTracker
 )
 
 o2_define_bucket(
@@ -2360,23 +2349,6 @@ o2_define_bucket(
     MIDClustering
 )
 
-o2_define_bucket(
-    NAME
-    mid_simulation_bucket
-
-    DEPENDENCIES
-    mid_base_bucket
-    root_base_bucket
-    fairroot_base_bucket
-    DetectorsBase
-    detectors_base_bucket
-    SimulationDataFormat
-    MIDBase
-
-    INCLUDE_DIRECTORIES
-    ${CMAKE_SOURCE_DIR}/Detectors/Base/include
-    ${CMAKE_SOURCE_DIR}/DataFormats/simulation/include
-)
 
 o2_define_bucket(
     NAME
@@ -2473,6 +2445,7 @@ o2_define_bucket(
     root_base_bucket
     mid_base_bucket
     MIDBase
+    SimulationDataFormat
 )
 
 o2_define_bucket(
@@ -2488,4 +2461,110 @@ o2_define_bucket(
     INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/Common/Field/include
     ${CMAKE_SOURCE_DIR}/Detectors/MUON/MCH/Base/include
+)
+
+o2_define_bucket(
+    NAME
+    GPUCommon_bucket
+
+    DEPENDENCIES
+    Core
+
+    INCLUDE_DIRECTORIES
+    ${ROOT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/GPU/Common
+)
+
+o2_define_bucket(
+    NAME
+    TPCFastTransformation_bucket
+
+    DEPENDENCIES
+    dl
+    pthread
+    root_base_bucket
+    common_vc_bucket
+    GPUCommon_bucket
+
+    INCLUDE_DIRECTORIES
+    ${ROOT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/GPU/TPCFastTransformation
+)
+
+o2_define_bucket(
+    NAME
+    GPUTracking_bucket
+
+    DEPENDENCIES
+    dl
+    pthread
+    root_base_bucket
+    common_vc_bucket
+    TRDBase
+    ITStracking
+    GPUCommon_bucket
+    TPCFastTransformation_bucket
+    O2TPCFastTransformation
+    data_format_TPC_bucket
+    Gpad
+    RIO
+    Graf
+    glfw_bucket
+    DebugGUI
+
+    INCLUDE_DIRECTORIES
+    ${ROOT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Global
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Base
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/SliceTracker
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Merger
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/TRDTracking
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Interface
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/HLTHeaders
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Standalone
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/ITS
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/dEdx
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Standalone/display
+    ${CMAKE_SOURCE_DIR}/GPU/GPUTracking/Standalone/qa
+    ${CMAKE_SOURCE_DIR}/Framework/Core/include
+    ${CMAKE_SOURCE_DIR}/Detectors/ITSMFT/ITS/tracking/include
+    ${CMAKE_SOURCE_DIR}/Detectors/TRD/base/include
+)
+
+o2_define_bucket(
+    NAME
+    GPUTrackingHIP_bucket
+
+    DEPENDENCIES
+    GPUTracking_bucket
+)
+
+o2_define_bucket(
+    NAME
+    GPUTrackingCUDA_bucket
+
+    DEPENDENCIES
+    GPUTracking_bucket
+    ITStrackingCUDA
+)
+
+o2_define_bucket(
+    NAME
+    GPUTrackingOCL_bucket
+
+    DEPENDENCIES
+    GPUTracking_bucket
+)
+
+o2_define_bucket(
+    NAME
+    TPCSpaceChargeBase_bucket
+
+    DEPENDENCIES
+    root_base_bucket Hist MathCore Matrix Physics GPUCommon_bucket
+
+    INCLUDE_DIRECTORIES
+    ${ROOT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/GPU/TPCSpaceChargeBase
 )

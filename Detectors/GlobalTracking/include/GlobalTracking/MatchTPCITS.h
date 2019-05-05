@@ -32,7 +32,8 @@
 #include "DataFormatsITS/TrackITS.h"
 #include "DataFormatsTPC/ClusterNativeHelper.h"
 #include "TPCFastTransform.h"
-#include "AliGPUCAParam.h" // Consider more universal access
+#include "GPUO2Interface.h" // Needed for propper settings in GPUParam.h
+#include "GPUParam.h"       // Consider more universal access
 
 class TTree;
 
@@ -50,7 +51,7 @@ namespace ITS
 class TrackITS;
 }
 
-namespace ITSMFT
+namespace itsmft
 {
 class Cluster;
 }
@@ -142,7 +143,7 @@ struct matchRecord {
 class MatchTPCITS
 {
   using MCLabCont = o2::dataformats::MCTruthContainer<o2::MCCompLabel>;
-  using TPCTransform = ali_tpc_common::tpc_fast_transformation::TPCFastTransform;
+  using TPCTransform = o2::gpu::TPCFastTransform;
 
  public:
   static constexpr float XTPCInnerRef = 83.0;                            ///< reference radius at which TPC provides the tracks
@@ -408,7 +409,7 @@ class MatchTPCITS
   o2::TPC::ClusterNativeHelper::Reader* mTPCClusterReader = nullptr; ///< TPC cluster reader
   o2::TPC::ClusterNativeAccessFullTPC mTPCClusterIdxStruct;          ///< struct holding the TPC cluster indices
   std::unique_ptr<TPCTransform> mTPCTransform;                       ///< TPC cluster transformation
-  std::unique_ptr<AliGPUCAParam> mTPCClusterParam;                   ///< TPC clusters error param
+  std::unique_ptr<o2::gpu::GPUParam> mTPCClusterParam;               ///< TPC clusters error param
 
   TTree* mOutputTree = nullptr; ///< output tree for matched tracks
 
@@ -417,7 +418,7 @@ class MatchTPCITS
   std::vector<o2::ITS::TrackITS>* mITSTracksArrayInp = nullptr; ///< input ITS tracks
   std::vector<o2::TPC::TrackTPC>* mTPCTracksArrayInp = nullptr; ///< input TPC tracks
 
-  std::vector<o2::ITSMFT::Cluster>* mITSClustersArrayInp = nullptr; ///< input ITS clusters
+  std::vector<o2::itsmft::Cluster>* mITSClustersArrayInp = nullptr; ///< input ITS clusters
 
   o2::dataformats::MCTruthContainer<o2::MCCompLabel>* mITSTrkLabels = nullptr; ///< input ITS Track MC labels
   o2::dataformats::MCTruthContainer<o2::MCCompLabel>* mTPCTrkLabels = nullptr; ///< input TPC Track MC labels
