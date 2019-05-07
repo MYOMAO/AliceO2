@@ -83,8 +83,14 @@ namespace o2
 			std::unique_ptr<TTree> outTreeROF; // output tree with ROF records
 			std::vector<ChipPixelData> mChips;
 			std::vector<o2::ITSMFT::Digit> mDigits;
+			std::vector<o2::ITSMFT::Digit> mMultiDigits;
+
 			ChipPixelData* mChipData = nullptr; 
 			std::string inpName = "Split9.bin";
+			int IndexPush;
+
+
+
 
 		};
 

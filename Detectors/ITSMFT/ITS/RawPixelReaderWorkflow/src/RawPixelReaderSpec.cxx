@@ -28,6 +28,9 @@ namespace o2
 
 		void RawPixelReader::init(InitContext& ic)
 		{
+			IndexPush = 0;
+
+
 			o2::base::GeometryManager::loadGeometry ();
 			LOG(INFO) << "inpName = " << inpName;
 			o2::ITS::GeometryTGeo * geom = o2::ITS::GeometryTGeo::Instance ();
@@ -40,6 +43,38 @@ namespace o2
 			//	rawReader.imposeMaxPage(1); // pages are 8kB in size (no skimming)
 			rawReader.setVerbosity(0);
 			mDigits.clear();
+			mMultiDigits.clear();
+
+			int Index = 0;
+			int IndexMax = 10000;
+			int NChip = 0;
+			int NChipMax = 20;
+
+
+
+			while (mChipData = rawReader.getNextChipData(mChips)) {
+				if(NChip > NChipMax) break;
+
+				const auto& pixels = mChipData->getData();
+				int ChipID = mChipData->getChipID();
+
+				for (auto& pixel : pixels) {
+					if(Index > IndexMax) break;
+					int col = pixel.getCol();
+					int row = pixel.getRow();
+
+					//			LOG(INFO) << "Chip ID Before " << ChipID << " Row = " << row << "   Column = " << col;
+
+					mDigits.emplace_back(ChipID, Index, row, col, 0);
+					//			LOG(INFO) << "Chip ID After " << mDigits[Index].getChipIndex() << " Row = " << mDigits[Index].getRow() << "   Column = " << mDigits[Index].getColumn();
+					Index = Index + 1;
+
+
+				}
+				NChip = NChip + 1;
+
+			}
+			LOG(INFO) << "Integrated Raw Pixel Pushed " << mDigits.size();
 
 
 		}
@@ -50,37 +85,39 @@ namespace o2
 		{
 
 
-			int Index = 0;
-			int IndexMax = 1;
-			int Size;
-			int SizeMax = 1;
+			int NDigits = 10;
 
-			LOG(INFO) << "Index = " << Index;
-			LOG(INFO) << "IndexMax = " << IndexMax;
+			if(IndexPush < mDigits.size()){
 
-			LOG(INFO) << "START WORKING Bro";
+				for(int i = 0; i < NDigits; i++){
 
-			while (mChipData = rawReader.getNextChipData(mChips)) {
-				Size = 0;
-				if(Index > IndexMax) break;
-				const auto& pixels = mChipData->getData();
-				auto ChipID = mChipData->getChipID();
-
-				for (auto& pixel : pixels) {
-					if(Size > SizeMax) break;
-					auto col = pixel.getCol();
-					auto row = pixel.getRow();
-					mDigits.emplace_back(ChipID, row, col);
-					Size = Size + 1;
+					mMultiDigits.push_back(mDigits[IndexPush + i]);
 				}
+				LOG(INFO) << "NDgits = " << NDigits  << "    mMultiDigits Pushed = " << mMultiDigits.size();
 
-				Index = Index + 1;
+				//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
+				//	LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
+				//	pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits[IndexPush++]);
+				pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mMultiDigits);
+				mMultiDigits.clear();
+				IndexPush = IndexPush + NDigits;
 			}
-			LOG(INFO) << "Raw Pixel Pushed " << mDigits.size();
-			pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits);
-			mDigits.clear();
-			LOG(INFO) << "Digit Cleared";	
+
+
+
+
+
+			/*
+
+			   if(IndexPush < mDigits.size()){
+
+			//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
+			//	LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
+			pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits[IndexPush++]);
+			}
 			//pc.services().get<ControlService>().readyToQuit(true);
+			*/
+
 		}
 
 
