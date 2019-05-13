@@ -32,8 +32,12 @@ namespace o2
 
 		void RawPixelGetter::run(ProcessingContext& pc)
 		{
-			auto digits = pc.inputs().get<const std::vector<o2::ITSMFT::Digit>>("digits");
-			LOG(INFO) << "ITSClusterer pulled " << digits.size() << " digits";
+			//auto digits = pc.inputs().get<const std::vector<o2::ITSMFT::Digit>>("digits");
+			//LOG(INFO) << "Digit Size Getting For This TimeFrame (Event)" <<  digits.size();
+			int ResetDecision = pc.inputs().get<int>("in");
+			LOG(INFO) << "Reset Histogram Decision = " << ResetDecision;
+			o2::ITSMFT::Digit digit = pc.inputs().get<o2::ITSMFT::Digit>("digits");
+			LOG(INFO) << "Chip ID Getting " << digit.getChipIndex() << " Row = " << digit.getRow() << "   Column = " << digit.getColumn();
 			//pc.services().get<ControlService>().readyToQuit(true);
 		}
 
@@ -44,6 +48,7 @@ namespace o2
 				"its-rawpixel-getter",
 					Inputs{
 						InputSpec{ "digits", "ITS", "DIGITS", 0, Lifetime::Timeframe },
+						InputSpec{ "in", "TST", "TEST", 0, Lifetime::Timeframe },
 					},
 					Outputs{
 					},

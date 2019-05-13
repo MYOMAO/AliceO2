@@ -72,6 +72,7 @@ namespace o2
 			{
 				mChips.resize(n);
 			}
+			std::vector<std::string> GetFName(std::string folder);
 
 			private:
 			std::unique_ptr<TFile> mFile = nullptr;
@@ -83,8 +84,22 @@ namespace o2
 			std::unique_ptr<TTree> outTreeROF; // output tree with ROF records
 			std::vector<ChipPixelData> mChips;
 			std::vector<o2::ITSMFT::Digit> mDigits;
+			std::vector<o2::ITSMFT::Digit> mMultiDigits;
+
 			ChipPixelData* mChipData = nullptr; 
 			std::string inpName = "Split9.bin";
+			int IndexPush;
+			int PixelSize;
+			std::vector<int> NDigits;
+			std::vector<std::string> FolderNames;
+			std::vector<std::vector<std::string>> FileNames;
+			std::string workdir = "infiles";
+			std::vector<std::string> NowFolderNames;
+			std::vector<std::vector<std::string>> NowFileNames;
+			std::vector<std::string> DiffFolderName;
+			std::vector<std::string> DiffFileNamePush;
+			std::vector<std::vector<std::string>> DiffFileNames;
+			int ResetCommand;
 
 		};
 
