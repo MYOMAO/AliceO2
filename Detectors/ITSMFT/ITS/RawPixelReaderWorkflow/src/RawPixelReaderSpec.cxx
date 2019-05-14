@@ -134,7 +134,10 @@ namespace o2
 
 			if( DiffFolderName.size() > 0 ){
 				cout << "New Run Started -- Reset All Histograms" << endl;
-				ResetCommand = 1;
+				ResetCommand = 1;	
+				pc.outputs().snapshot(Output{ "TST", "TEST", 0, Lifetime::Timeframe }, ResetCommand);
+				ResetCommand = 0;	
+				LOG(INFO) << "DONE Reset Histogram Decision";
 			}
 
 
@@ -180,9 +183,12 @@ namespace o2
 			LOG(INFO) << "Start Loop Bro";
 
 			for (int i = 0; i < NowFolderNames.size(); i++){
-		
-			//	LOG(INFO) << "i = " << i << "    DiffFileNames[i].size() = " << DiffFileNames[i].size();
-		
+				
+				//	LOG(INFO) << "i = " << i << "    DiffFileNames[i].size() = " << DiffFileNames[i].size();
+				pc.outputs().snapshot(Output{ "TST", "TEST2", 0, Lifetime::Timeframe }, i+1);
+				
+
+
 				for(int j = 0; j < DiffFileNames[i].size(); j++){
 
 					inpName = DiffFileNames[i][j];
@@ -243,21 +249,23 @@ namespace o2
 
 
 	
-			pc.outputs().snapshot(Output{ "TST", "TEST", 0, Lifetime::Timeframe }, ResetCommand);
 
-	
-			LOG(INFO) << "DONE Reset Histogram Decision";
 
+			
+
+		
 
 			LOG(INFO) << "Before:  " << "IndexPush = " << IndexPush << "     mDigits.size() = " <<  mDigits.size(); 
 			while(IndexPush < mDigits.size()){
 
 				//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
-				LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
 				pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits[IndexPush++]);
+				LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
+
 			}
 			//pc.services().get<ControlService>().readyToQuit(true);
 			
+
 
 			LOG(INFO) << "After:  " << "IndexPush = " << IndexPush << "     mDigits.size() = " <<  mDigits.size(); 
 
@@ -280,7 +288,7 @@ namespace o2
 			cout << " " << endl;
 			cout << " " << endl;	
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+			std::this_thread::sleep_for(std::chrono::milliseconds(6000));
 			
 		}
 
@@ -315,7 +323,6 @@ namespace o2
 		}
 
 
-
 		DataProcessorSpec getRawPixelReaderSpec()
 		{
 			return DataProcessorSpec{
@@ -324,6 +331,7 @@ namespace o2
 					Outputs{
 						OutputSpec{ "ITS", "DIGITS", 0, Lifetime::Timeframe },
 						OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
+						OutputSpec{ "TST", "TEST2", 0, Lifetime::Timeframe },		
 					},
 					AlgorithmSpec{ adaptFromTask<RawPixelReader>() },
 			};

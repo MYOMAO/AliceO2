@@ -100,6 +100,8 @@ namespace o2
 			std::vector<std::string> DiffFileNamePush;
 			std::vector<std::vector<std::string>> DiffFileNames;
 			int ResetCommand;
+			std::string RunName;
+			int RunID;
 
 		};
 
