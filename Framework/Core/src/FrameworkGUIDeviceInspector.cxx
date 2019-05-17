@@ -107,6 +107,7 @@ void displayDeviceInspector(DeviceSpec const& spec, DeviceInfo const& info, Devi
 {
   ImGui::Text("Name: %s", spec.name.c_str());
   ImGui::Text("Pid: %d", info.pid);
+  ImGui::Text("Rank: %zu/%zu%%%zu", spec.rank, spec.nSlots, spec.inputTimesliceId);
 
   if (ImGui::Button("Attach debugger")) {
     std::string pid = std::to_string(info.pid);
@@ -118,7 +119,7 @@ void displayDeviceInspector(DeviceSpec const& spec, DeviceInfo const& info, Devi
       pid + "\"'";
     setenv("O2DPLDEBUG", defaultAppleDebugCommand.c_str(), 0);
 #else
-    setenv("O2DPLDEBUG", "xterm -hold -e gdb attach $O2DEBUGGEDPID", 0);
+    setenv("O2DPLDEBUG", "xterm -hold -e gdb attach $O2DEBUGGEDPID &", 0);
 #endif
     int retVal = system(getenv("O2DPLDEBUG"));
     (void)retVal;

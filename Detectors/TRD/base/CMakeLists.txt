@@ -9,14 +9,15 @@ SET(SRCS
   src/TRDGeometryFlat.cxx
   src/TRDCommonParam.cxx
   src/TRDSimParam.cxx
+  src/PadResponse.cxx
   src/Digit.cxx
   src/TRDArrayADC.cxx
   src/TRDArrayDictionary.cxx
   src/TRDArraySignal.cxx
   src/TRDCalPadStatus.cxx
   src/TRDCalSingleChamberStatus.cxx
-  src/TRDCalDet.cxx
-  src/TRDCalROC.cxx
+  src/CalDet.cxx
+  src/CalROC.cxx
   src/TRDFeeParam.cxx
   src/TRDSignalIndex.cxx
 )
@@ -28,15 +29,17 @@ SET(HEADERS
   include/${MODULE_NAME}/TRDGeometryFlat.h
   include/${MODULE_NAME}/TRDSimParam.h
   include/${MODULE_NAME}/TRDCommonParam.h
+  include/${MODULE_NAME}/PadResponse.h
   include/${MODULE_NAME}/Digit.h
+  include/${MODULE_NAME}/DigitIndex.h
   include/${MODULE_NAME}/TRDDigitsParam.h
   include/${MODULE_NAME}/TRDArrayADC.h
   include/${MODULE_NAME}/TRDArrayDictionary.h
   include/${MODULE_NAME}/TRDArraySignal.h
   include/${MODULE_NAME}/TRDCalPadStatus.h
   include/${MODULE_NAME}/TRDCalSingleChamberStatus.h
-  include/${MODULE_NAME}/TRDCalDet.h
-  include/${MODULE_NAME}/TRDCalROC.h
+  include/${MODULE_NAME}/CalDet.h
+  include/${MODULE_NAME}/CalROC.h
   include/${MODULE_NAME}/TRDFeeParam.h
   include/${MODULE_NAME}/TRDSignalIndex.h
 )

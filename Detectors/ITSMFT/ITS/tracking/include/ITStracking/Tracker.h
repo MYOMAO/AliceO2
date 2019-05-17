@@ -36,6 +36,10 @@
 
 namespace o2
 {
+namespace gpu
+{
+class GPUChainITS;
+}
 namespace ITS
 {
 
@@ -93,6 +97,7 @@ class Tracker
   std::uint32_t mROFrame = 0;
   std::vector<TrackITS> mTracks;
   dataformats::MCTruthContainer<MCCompLabel> mTrackLabels;
+  o2::gpu::GPUChainITS* mRecoChain = nullptr;
 };
 
 void Tracker::setParameters(const std::vector<MemoryParameters>& memPars, const std::vector<TrackingParameters>& trkPars)
