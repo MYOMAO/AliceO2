@@ -60,8 +60,8 @@ namespace o2
 
 		class RawPixelReader : public Task
 		{
-			using ChipPixelData = o2::ITSMFT::ChipPixelData;
-			using PixelReader = o2::ITSMFT::PixelReader;
+			using ChipPixelData = o2::itsmft::ChipPixelData;
+			using PixelReader = o2::itsmft::PixelReader;
 
 			public:
 			RawPixelReader() = default;
@@ -76,15 +76,15 @@ namespace o2
 
 			private:
 			std::unique_ptr<TFile> mFile = nullptr;
-			o2::ITSMFT::RawPixelReader<o2::ITSMFT::ChipMappingITS> rawReader;
-			o2::ITSMFT::ChipPixelData chipData;
+			o2::itsmft::RawPixelReader<o2::itsmft::ChipMappingITS> rawReader;
+			o2::itsmft::ChipPixelData chipData;
 			std::size_t rofEntry = 0, nrofdig = 0;
 			std::unique_ptr<TFile> outFileDig;
 			std::unique_ptr<TTree> outTreeDig; // output tree with digits
 			std::unique_ptr<TTree> outTreeROF; // output tree with ROF records
 			std::vector<ChipPixelData> mChips;
-			std::vector<o2::ITSMFT::Digit> mDigits;
-			std::vector<o2::ITSMFT::Digit> mMultiDigits;
+			std::vector<o2::itsmft::Digit> mDigits;
+			std::vector<o2::itsmft::Digit> mMultiDigits;
 
 			ChipPixelData* mChipData = nullptr; 
 			std::string inpName = "Split9.bin";
@@ -101,8 +101,15 @@ namespace o2
 			std::vector<std::vector<std::string>> DiffFileNames;
 			int ResetCommand;
 			std::string RunName;
-			int RunID;
-
+			std::string RunID;
+			int NEvent;
+			int EventPerPush;
+			int EventRegistered;
+			int TotalPixelSize;
+			static constexpr int  NError = 10;
+			unsigned int Error[NError];
+			int pos;
+			int j;
 		};
 
 		/// create a processor spec

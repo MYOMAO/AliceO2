@@ -28,6 +28,8 @@
 #include "ITStracking/IOUtils.h"
 #include "ITStracking/Tracker.h"
 #include "ITStracking/TrackerTraitsCPU.h"
+#include "ITStracking/Vertexer.h"
+#include "ITStracking/VertexerTraits.h"
 
 #include "Field/MagneticField.h"
 #include "DataFormatsParameters/GRPObject.h"
@@ -52,9 +54,11 @@ class TrackerDPL : public Task
 
  private:
   int mState = 0;
-  o2::ITS::TrackerTraitsCPU mTraits;
+  o2::ITS::TrackerTraitsCPU mTrackerTraits;
+  o2::ITS::VertexerTraits mVertexerTraits;
   std::unique_ptr<o2::parameters::GRPObject> mGRP = nullptr;
   std::unique_ptr<o2::ITS::Tracker> mTracker = nullptr;
+  std::unique_ptr<o2::ITS::Vertexer> mVertexer = nullptr;
 };
 
 void TrackerDPL::init(InitContext& ic)
@@ -71,7 +75,8 @@ void TrackerDPL::init(InitContext& ic)
     geom->fillMatrixCache(o2::utils::bit2Mask(o2::TransformType::T2L, o2::TransformType::T2GRot,
                                               o2::TransformType::T2G));
 
-    mTracker = std::make_unique<o2::ITS::Tracker>(&mTraits);
+    mTracker = std::make_unique<o2::ITS::Tracker>(&mTrackerTraits);
+    mVertexer = std::make_unique<o2::ITS::Vertexer>(&mVertexerTraits);
     double origD[3] = { 0., 0., 0. };
     mTracker->setBz(field->getBz(origD));
   } else {
@@ -86,11 +91,11 @@ void TrackerDPL::run(ProcessingContext& pc)
   if (mState != 1)
     return;
 
-  auto compClusters = pc.inputs().get<const std::vector<o2::ITSMFT::CompClusterExt>>("compClusters");
-  auto clusters = pc.inputs().get<const std::vector<o2::ITSMFT::Cluster>>("clusters");
+  auto compClusters = pc.inputs().get<const std::vector<o2::itsmft::CompClusterExt>>("compClusters");
+  auto clusters = pc.inputs().get<const std::vector<o2::itsmft::Cluster>>("clusters");
   auto labels = pc.inputs().get<const o2::dataformats::MCTruthContainer<o2::MCCompLabel>*>("labels");
-  auto rofs = pc.inputs().get<const std::vector<o2::ITSMFT::ROFRecord>>("ROframes");
-  auto mc2rofs = pc.inputs().get<const std::vector<o2::ITSMFT::MC2ROFRecord>>("MC2ROframes");
+  auto rofs = pc.inputs().get<const std::vector<o2::itsmft::ROFRecord>>("ROframes");
+  auto mc2rofs = pc.inputs().get<const std::vector<o2::itsmft::MC2ROFRecord>>("MC2ROframes");
 
   LOG(INFO) << "ITSTracker pulled " << clusters.size() << " clusters, "
             << labels->getIndexedSize() << " MC label objects , in "
@@ -113,7 +118,8 @@ void TrackerDPL::run(ProcessingContext& pc)
       int nclUsed = o2::ITS::IOUtils::loadROFrameData(rof, event, &clusters, labels.get());
       if (nclUsed) {
         LOG(INFO) << "ROframe: " << roFrame << ", clusters loaded : " << nclUsed;
-        event.addPrimaryVertex(0.f, 0.f, 0.f); //FIXME :  run an actual vertex finder !
+        mVertexer->clustersToVertices(event);
+        event.addPrimaryVertices(mVertexer->exportVertices());
         mTracker->setROFrame(roFrame);
         mTracker->clustersToTracks(event);
         tracks.swap(mTracker->getTracks());

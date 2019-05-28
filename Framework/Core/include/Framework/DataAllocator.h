@@ -377,6 +377,16 @@ class DataAllocator
     addPartToContext(std::move(payloadMessage), spec, o2::header::gSerializationMethodNone);
   }
 
+
+void  snapshot(const Output& spec, const char* payload, size_t payloadSize, o2::header::SerializationMethod serializationMethod)
+  {
+    auto proxy = mContextRegistry->get<MessageContext>()->proxy();
+    FairMQMessagePtr payloadMessage(proxy.createMessage(payloadSize));
+    memcpy(payloadMessage->GetData(), payload, payloadSize);
+
+    addPartToContext(std::move(payloadMessage), spec, serializationMethod);
+  }
+
   /// Serialize a snapshot of a std::vector of trivially copyable, non-polymorphic
   /// elements, which will then be sent once the computation ends.
   /// Framework does not take ownership of @param object. Changes to @param object
