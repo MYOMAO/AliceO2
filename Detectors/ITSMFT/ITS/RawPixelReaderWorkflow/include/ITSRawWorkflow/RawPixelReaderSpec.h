@@ -107,9 +107,13 @@ namespace o2
 			int EventRegistered;
 			int TotalPixelSize;
 			static constexpr int  NError = 10;
-			unsigned int Error[NError];
+//			unsigned int Error[NError];
+			std::array<unsigned int,NError> Error;
 			int pos;
 			int j;
+			std::vector<std::array<unsigned int,NError>> ErrorVec;
+			std::vector<std::string>  NewNextFold;
+			int FileDone;
 		};
 
 		/// create a processor spec

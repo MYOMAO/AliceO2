@@ -67,7 +67,7 @@ namespace o2
 			}
 
 
-			EventPerPush = 10000;
+			EventPerPush = 3000;
 			EventRegistered = 0;
 			TotalPixelSize = 0;
 
@@ -81,9 +81,9 @@ namespace o2
 			LOG(INFO) << "numOfChips = " << numOfChips;
 			setNChips (numOfChips);	
 			j = 0;
+			FileDone = 1;
 
 
-		
 
 
 
@@ -137,13 +137,18 @@ namespace o2
 			if( DiffFolderName.size() == 0 ){
 				cout << "No New Run -- No Need to Fucking Reset" << endl;
 				ResetCommand = 0;
+				pc.outputs().snapshot(Output{ "TST", "TEST", 0, Lifetime::Timeframe }, ResetCommand);
 			}
 
 
 			if( DiffFolderName.size() > 0){
 				cout << "New Run Started -- Reset All Histograms" << endl;
 				ResetCommand = 1;	
-		//		pc.outputs().snapshot(Output{ "TST", "TEST", 0, Lifetime::Timeframe }, ResetCommand);
+				pc.outputs().snapshot(Output{ "TST", "TEST", 0, Lifetime::Timeframe }, ResetCommand);
+				for(int i = 0; i < NError; i++){
+					Error[i] = 0;
+				}
+				ErrorVec.clear();
 				ResetCommand = 0;	
 				LOG(INFO) << "DONE Reset Histogram Decision";
 
@@ -190,15 +195,25 @@ namespace o2
 
 			for (int i = 0; i < NowFolderNames.size(); i++){
 
-				LOG(INFO) << "i = " << i << "    DiffFileNames[i].size() = " << DiffFileNames[i].size();
-//				pc.outputs().snapshot(Output{ "TST", "TEST2", 0, Lifetime::Timeframe }, i+1);
+				LOG(INFO) << "i = " << i << "    DiffFileNames[i].size() = " << DiffFileNames[i].size();			
 				pos = NowFolderNames[i].find_last_of("/");
+
 				if (pos != string::npos)   RunID =  NowFolderNames[i].substr(pos+1);
 
 
-				for(int j = 0; j < DiffFileNames[i].size(); j++){
+			//	for(int j = 0; j < DiffFileNames[i].size(); j++){
+				if(DiffFileNames[i].size() > 0 && FileDone == 1){ 
+					
+					FileDone = 0;
+					cout << "RunID = " << RunID << endl;
+					cout << "File Location = " << DiffFileNames[i][0] << endl;
+		
+					
 
-					inpName = DiffFileNames[i][j];
+					inpName = DiffFileNames[i][0];
+
+
+
 					EventRegistered = 0;
 					LOG(INFO) << "inpName = " << inpName;
 
@@ -223,15 +238,15 @@ namespace o2
 
 					while (mChipData = rawReader.getNextChipData(mChips)) {
 						if(NChip < NChipMax) break;
-					//	cout << "Pass Chip" << endl;
-					
+						//	cout << "Pass Chip" << endl;
+
 
 						const auto* ruInfo = rawErrorReader.getCurrRUDecodeData()->ruInfo;	
 						const auto& statRU =  rawErrorReader.getRUDecodingStatSW( ruInfo->idSW );
 
 						const auto& pixels = mChipData->getData();
 						int PixelSize = mChipData->getData().size();
-						
+
 
 						NEvent = statRU->nPackets;
 
@@ -239,30 +254,31 @@ namespace o2
 
 
 						if(NEvent > (EventRegistered + 1) * EventPerPush){				
-						NDigits.push_back(TotalPixelSize);
-						EventRegistered = EventRegistered + 1;
-						cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed" << endl; 
-						TotalPixelSize = 0;
+							NDigits.push_back(TotalPixelSize);
+							EventRegistered = EventRegistered + 1;
+							ErrorVec.push_back(Error);
+							cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed" << endl; 
+							TotalPixelSize = 0;
 						}
 
 						if (NEvent%100000==0 && TimePrint == 0){
-						cout << "Event Number = " << NEvent   << endl;
+							cout << "Event Number = " << NEvent   << endl;
 							TimePrint = 1;
 						}
 
 						if(NEvent%100000 != 0 ) TimePrint = 0;
 
 
-						Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
-						Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
-						Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
-						Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
-						Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
-						Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
-						Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
-						Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
-						Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
-						Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
+					if(Error[0]  < 107374082)  Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
+					if(Error[1]  < 107374082)	Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
+					if(Error[2]  < 107374082)	Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
+					if(Error[3]  < 107374082)	Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
+					if(Error[4]  < 107374082)	Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
+					if(Error[5]  < 107374082)	Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
+					if(Error[6]  < 107374082)	Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
+					if(Error[7]  < 107374082)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
+					if(Error[8]  < 107374082)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
+					if(Error[9]  < 107374082)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
 
 						int ChipID = mChipData->getChipID();
 
@@ -283,9 +299,13 @@ namespace o2
 					}
 					cout << "Final TotalPixelSize = " << TotalPixelSize << endl; 
 					NDigits.push_back(TotalPixelSize);
-					LOG(INFO) <<"Run " << FolderNames[i] << " File " << FileNames[i][j]  <<  "    Integrated Raw Pixel Pushed " << mDigits.size();
+					ErrorVec.push_back(Error);
+					LOG(INFO) <<"Run " << NowFolderNames[i] << " File " << inpName  <<  "    Integrated Raw Pixel Pushed " << mDigits.size();
+					if(FolderNames.size() < NowFolderNames.size()) FileNames.push_back(NewNextFold);
+					FileNames[i].push_back(inpName);
 				}
 			}
+
 
 			LOG(INFO) << "DONE Pushing";
 
@@ -296,6 +316,21 @@ namespace o2
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
 				}
 				LOG(INFO) << "j = " << j << "   NDgits = " << NDigits[j]  << "    mMultiDigits Pushed = " << mMultiDigits.size();
+				
+				pc.outputs().snapshot(Output{ "TST", "Error", 0, Lifetime::Timeframe }, ErrorVec[j]);
+
+				/*
+				pc.outputs().snapshot(Output{ "TST", "Error0", 0, Lifetime::Timeframe }, ErrorVec[j][0]);
+				pc.outputs().snapshot(Output{ "TST", "Error1", 0, Lifetime::Timeframe }, ErrorVec[j][1]);
+				pc.outputs().snapshot(Output{ "TST", "Error2", 0, Lifetime::Timeframe }, ErrorVec[j][2]);
+				pc.outputs().snapshot(Output{ "TST", "Error3", 0, Lifetime::Timeframe }, ErrorVec[j][3]);
+				pc.outputs().snapshot(Output{ "TST", "Error4", 0, Lifetime::Timeframe }, ErrorVec[j][4]);
+				pc.outputs().snapshot(Output{ "TST", "Error5", 0, Lifetime::Timeframe }, ErrorVec[j][5]);
+				pc.outputs().snapshot(Output{ "TST", "Error6", 0, Lifetime::Timeframe }, ErrorVec[j][6]);
+				pc.outputs().snapshot(Output{ "TST", "Error7", 0, Lifetime::Timeframe }, ErrorVec[j][7]);
+				pc.outputs().snapshot(Output{ "TST", "Error8", 0, Lifetime::Timeframe }, ErrorVec[j][8]);
+				pc.outputs().snapshot(Output{ "TST", "Error9", 0, Lifetime::Timeframe }, ErrorVec[j][9]);
+				*/
 
 				//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
 				LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
@@ -305,7 +340,10 @@ namespace o2
 				IndexPush = IndexPush + NDigits[j];
 				j = j + 1;
 			}
-	
+
+
+
+
 			LOG(INFO) << "IndexPush After = " << IndexPush;
 
 
@@ -330,10 +368,10 @@ namespace o2
 			*/
 
 			FolderNames.clear();
-			FileNames.clear();
-
+		//	FileNames.clear();
+			NewNextFold.clear();
 			FolderNames = NowFolderNames;
-			FileNames = NowFileNames;
+		//	FileNames = NowFileNames;
 
 			NowFolderNames.clear();
 			NowFileNames.clear();
@@ -343,12 +381,14 @@ namespace o2
 			LOG(INFO) << "Pushing Reset Histogram Decision";
 
 			cout << "Resetting Pushing Things" << endl;
-
-
-			if(IndexPush >  mDigits.size() - 100){
-			mDigits.clear();
-			IndexPush = 0;
-			j = 0;
+		
+			//Resetting a New File //
+			if(IndexPush >  mDigits.size() - 5){
+				mDigits.clear();
+				IndexPush = 0;
+				j = 0;
+				NDigits.clear();
+				FileDone = 1;
 			}
 
 			cout << "Start Sleeping Bro" << endl;
@@ -405,8 +445,21 @@ namespace o2
 					Inputs{},
 					Outputs{
 						OutputSpec{ "ITS", "DIGITS", 0, Lifetime::Timeframe },
-//						OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
-//						OutputSpec{ "TST", "TEST2", 0, Lifetime::Timeframe },		
+						OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
+						OutputSpec{ "TST", "Error", 0, Lifetime::Timeframe },	
+						/*
+						OutputSpec{ "TST", "Error0", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error1", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error2", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error3", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error4", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error5", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error6", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error7", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error8", 0, Lifetime::Timeframe },
+						OutputSpec{ "TST", "Error9", 0, Lifetime::Timeframe },
+						*/	
+						//		OutputSpec{ "TST", "TEST3", 0, Lifetime::Timeframe },			
 					},
 					AlgorithmSpec{ adaptFromTask<RawPixelReader>() },
 			};
