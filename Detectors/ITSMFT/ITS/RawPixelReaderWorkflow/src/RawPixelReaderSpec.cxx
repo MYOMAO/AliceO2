@@ -67,7 +67,7 @@ namespace o2
 			}
 
 
-			EventPerPush = 3000;
+			EventPerPush = 100000;
 			EventRegistered = 0;
 			TotalPixelSize = 0;
 
@@ -207,7 +207,10 @@ namespace o2
 					FileDone = 0;
 					cout << "RunID = " << RunID << endl;
 					cout << "File Location = " << DiffFileNames[i][0] << endl;
-		
+					
+					std::string runname = "run000146";
+					pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe },runname );
+
 					
 
 					inpName = DiffFileNames[i][0];
@@ -447,6 +450,7 @@ namespace o2
 						OutputSpec{ "ITS", "DIGITS", 0, Lifetime::Timeframe },
 						OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
 						OutputSpec{ "TST", "Error", 0, Lifetime::Timeframe },	
+						OutputSpec{ "TST", "Run", 0, Lifetime::Timeframe },	
 						/*
 						OutputSpec{ "TST", "Error0", 0, Lifetime::Timeframe },
 						OutputSpec{ "TST", "Error1", 0, Lifetime::Timeframe },
