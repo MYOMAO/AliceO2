@@ -233,6 +233,7 @@ namespace o2
 
 
 					ofstream fout(Form("ErrorData/ErrorLogRun%d_File%d.dat",RunName,FileID));
+					fout << " START OF ERROR REPORT For Run " <<  RunName << "  File " <<  FileID << endl;	
 
 					inpName = DiffFileNames[i][0];
 
@@ -314,8 +315,9 @@ namespace o2
 
 						if(TrackError == 1){
 							if(NEventPre != NEvent){
-								fout << "Event Number = " << NEvent   << endl;
-								fout << " ------------------------------------------------"   << endl;	
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0 ||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0){
+									fout << "Event Number = " << NEvent   << endl;
+									fout << " ------------------------------------------------"   << endl;	
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0) fout << "Error ID 1: ErrPageCounterDiscontinuity Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0) fout << "Error ID 2: ErrRDHvsGBTHPageCnt Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0) fout << "Error ID 3: ErrMissingGBTHeader Is Detected"  << endl;
@@ -326,7 +328,8 @@ namespace o2
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0) fout << "Error ID 8: ErrNoDataForActiveLane Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 9: ErrIBChipLaneMismatch Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 10: ErrCableDataHeadWrong Is Detected"  << endl;
-								fout << " ------------------------------------------------"  << endl;
+									fout << " ------------------------------------------------"  << endl;
+								}
 							}
 						}
 
@@ -353,6 +356,7 @@ namespace o2
 					LOG(INFO) <<"Run " << NowFolderNames[i] << " File " << inpName  <<  "    Integrated Raw Pixel Pushed " << mDigits.size();
 					if(FolderNames.size() < NowFolderNames.size()) FileNames.push_back(NewNextFold);
 					FileNames[i].push_back(inpName);
+					fout << " END OF ERROR REPORT " << endl;	
 				}
 			}
 
