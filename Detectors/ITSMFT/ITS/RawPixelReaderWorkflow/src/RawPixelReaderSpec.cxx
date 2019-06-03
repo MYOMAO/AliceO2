@@ -315,18 +315,17 @@ namespace o2
 						if(TrackError == 1){
 							if(NEventPre != NEvent){
 								fout << "Event Number = " << NEvent   << endl;
-								for(int q = 0; q < NError; q++)
-								fout << " ------------------------------------------------"   << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0) fout << "Error ID 1: ErrPageCounterDiscontinuity Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0) fout << "Error ID 2: ErrRDHvsGBTHPageCnt Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0) fout << "Error ID 3: ErrMissingGBTHeader Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0) fout << "Error ID 4: ErrMissingGBTTrailer Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0) fout << "Error ID 5: ErrNonZeroPageAfterStop Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0) fout << "Error ID 6: ErrUnstoppedLanes Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0) fout << "Error ID 7: ErrDataForStoppedLane Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0) fout << "Error ID 8: ErrNoDataForActiveLane Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 9: ErrIBChipLaneMismatch Is Detected"  << endl;
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 10: ErrCableDataHeadWrong Is Detected"  << endl;
+								fout << " ------------------------------------------------"   << endl;	
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0) fout << "Error ID 1: ErrPageCounterDiscontinuity Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0) fout << "Error ID 2: ErrRDHvsGBTHPageCnt Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0) fout << "Error ID 3: ErrMissingGBTHeader Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0) fout << "Error ID 4: ErrMissingGBTTrailer Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0) fout << "Error ID 5: ErrNonZeroPageAfterStop Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0) fout << "Error ID 6: ErrUnstoppedLanes Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0) fout << "Error ID 7: ErrDataForStoppedLane Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0) fout << "Error ID 8: ErrNoDataForActiveLane Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 9: ErrIBChipLaneMismatch Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 10: ErrCableDataHeadWrong Is Detected"  << endl;
 								fout << " ------------------------------------------------"  << endl;
 							}
 						}
