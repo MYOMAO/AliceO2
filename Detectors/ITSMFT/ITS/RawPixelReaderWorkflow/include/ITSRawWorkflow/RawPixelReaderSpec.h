@@ -100,7 +100,6 @@ namespace o2
 			std::vector<std::string> DiffFileNamePush;
 			std::vector<std::vector<std::string>> DiffFileNames;
 			int ResetCommand;
-			std::string RunName;
 			std::string RunID;
 			int NEvent;
 			int EventPerPush;
@@ -114,6 +113,10 @@ namespace o2
 			std::vector<std::array<unsigned int,NError>> ErrorVec;
 			std::vector<std::string>  NewNextFold;
 			int FileDone;
+			int FileID;
+			int RunName;
+			int TrackError;
+			int NEventPre;
 		};
 
 		/// create a processor spec

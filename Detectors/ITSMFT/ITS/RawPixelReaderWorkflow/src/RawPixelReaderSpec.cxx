@@ -66,8 +66,14 @@ namespace o2
 				Error[i] = 0;
 			}
 
+			std::ifstream EventPush("Config.dat");	
+			EventPush >> EventPerPush >> TrackError;
 
-			EventPerPush = 100000;
+
+			LOG(INFO) << "EventPerPush = " << EventPerPush << "   TrackError = " << TrackError;
+
+
+			//		EventPerPush = 3000;
 			EventRegistered = 0;
 			TotalPixelSize = 0;
 
@@ -201,19 +207,42 @@ namespace o2
 				if (pos != string::npos)   RunID =  NowFolderNames[i].substr(pos+1);
 
 
-			//	for(int j = 0; j < DiffFileNames[i].size(); j++){
+				//	for(int j = 0; j < DiffFileNames[i].size(); j++){
 				if(DiffFileNames[i].size() > 0 && FileDone == 1){ 
-					
+
 					FileDone = 0;
 					cout << "RunID = " << RunID << endl;
 					cout << "File Location = " << DiffFileNames[i][0] << endl;
-					
-					std::string runname = "run000146";
-					pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe },runname );
 
-					
+
+					size_t	last_index1 = RunID.find_last_not_of("0123456789");
+					string RunIDS = RunID.substr(last_index1 + 1);
+
+
+					string FileIDS;
+					pos = DiffFileNames[i][0].find_last_of("/");
+					if (pos != string::npos)   FileIDS = DiffFileNames[i][0].substr(pos+1);
+
+					cout << "Before FileIDS = " << FileIDS << endl;
+
+					size_t	last_index2 = FileIDS.find_last_not_of("0123456789");
+					FileIDS =  FileIDS.substr(last_index2 + 1);
+
+					RunName = std::stoi(RunIDS);
+					FileID =  std::stoi(FileIDS);
+
+
+					ofstream fout(Form("ErrorData/ErrorLogRun%d_File%d.dat",RunName,FileID));
 
 					inpName = DiffFileNames[i][0];
+
+
+					//		pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe }, RunID.data());
+					//		pc.outputs().snapshot(Output{ "TST", "File", 0, Lifetime::Timeframe }, inpName.data());
+
+
+
+
 
 
 
@@ -272,16 +301,35 @@ namespace o2
 						if(NEvent%100000 != 0 ) TimePrint = 0;
 
 
-					if(Error[0]  < 107374082)  Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
-					if(Error[1]  < 107374082)	Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
-					if(Error[2]  < 107374082)	Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
-					if(Error[3]  < 107374082)	Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
-					if(Error[4]  < 107374082)	Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
-					if(Error[5]  < 107374082)	Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
-					if(Error[6]  < 107374082)	Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
-					if(Error[7]  < 107374082)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
-					if(Error[8]  < 107374082)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
-					if(Error[9]  < 107374082)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
+						if(Error[0]  < 107374082)  Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
+						if(Error[1]  < 107374082)	Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
+						if(Error[2]  < 107374082)	Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
+						if(Error[3]  < 107374082)	Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
+						if(Error[4]  < 107374082)	Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
+						if(Error[5]  < 107374082)	Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
+						if(Error[6]  < 107374082)	Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
+						if(Error[7]  < 107374082)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
+						if(Error[8]  < 107374082)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
+						if(Error[9]  < 107374082)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
+
+						if(TrackError == 1){
+							if(NEventPre != NEvent){
+								fout << "Event Number = " << NEvent   << endl;
+								for(int q = 0; q < NError; q++)
+								fout << " ------------------------------------------------"   << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0) fout << "Error ID 1: ErrPageCounterDiscontinuity Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0) fout << "Error ID 2: ErrRDHvsGBTHPageCnt Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0) fout << "Error ID 3: ErrMissingGBTHeader Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0) fout << "Error ID 4: ErrMissingGBTTrailer Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0) fout << "Error ID 5: ErrNonZeroPageAfterStop Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0) fout << "Error ID 6: ErrUnstoppedLanes Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0) fout << "Error ID 7: ErrDataForStoppedLane Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0) fout << "Error ID 8: ErrNoDataForActiveLane Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 9: ErrIBChipLaneMismatch Is Detected"  << endl;
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 10: ErrCableDataHeadWrong Is Detected"  << endl;
+								fout << " ------------------------------------------------"  << endl;
+							}
+						}
 
 						int ChipID = mChipData->getChipID();
 
@@ -298,7 +346,7 @@ namespace o2
 							Index = Index + 1;
 						}
 						NChip = NChip + 1;
-
+						NEventPre = NEvent;
 					}
 					cout << "Final TotalPixelSize = " << TotalPixelSize << endl; 
 					NDigits.push_back(TotalPixelSize);
@@ -319,21 +367,27 @@ namespace o2
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
 				}
 				LOG(INFO) << "j = " << j << "   NDgits = " << NDigits[j]  << "    mMultiDigits Pushed = " << mMultiDigits.size();
-				
+
+				cout << "RunIDS = " << RunName << "   FileIDS = " << FileID << endl;
+
+				pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe }, RunName);
+				pc.outputs().snapshot(Output{ "TST", "File", 0, Lifetime::Timeframe }, FileID);
+
+
 				pc.outputs().snapshot(Output{ "TST", "Error", 0, Lifetime::Timeframe }, ErrorVec[j]);
 
 				/*
-				pc.outputs().snapshot(Output{ "TST", "Error0", 0, Lifetime::Timeframe }, ErrorVec[j][0]);
-				pc.outputs().snapshot(Output{ "TST", "Error1", 0, Lifetime::Timeframe }, ErrorVec[j][1]);
-				pc.outputs().snapshot(Output{ "TST", "Error2", 0, Lifetime::Timeframe }, ErrorVec[j][2]);
-				pc.outputs().snapshot(Output{ "TST", "Error3", 0, Lifetime::Timeframe }, ErrorVec[j][3]);
-				pc.outputs().snapshot(Output{ "TST", "Error4", 0, Lifetime::Timeframe }, ErrorVec[j][4]);
-				pc.outputs().snapshot(Output{ "TST", "Error5", 0, Lifetime::Timeframe }, ErrorVec[j][5]);
-				pc.outputs().snapshot(Output{ "TST", "Error6", 0, Lifetime::Timeframe }, ErrorVec[j][6]);
-				pc.outputs().snapshot(Output{ "TST", "Error7", 0, Lifetime::Timeframe }, ErrorVec[j][7]);
-				pc.outputs().snapshot(Output{ "TST", "Error8", 0, Lifetime::Timeframe }, ErrorVec[j][8]);
-				pc.outputs().snapshot(Output{ "TST", "Error9", 0, Lifetime::Timeframe }, ErrorVec[j][9]);
-				*/
+				   pc.outputs().snapshot(Output{ "TST", "Error0", 0, Lifetime::Timeframe }, ErrorVec[j][0]);
+				   pc.outputs().snapshot(Output{ "TST", "Error1", 0, Lifetime::Timeframe }, ErrorVec[j][1]);
+				   pc.outputs().snapshot(Output{ "TST", "Error2", 0, Lifetime::Timeframe }, ErrorVec[j][2]);
+				   pc.outputs().snapshot(Output{ "TST", "Error3", 0, Lifetime::Timeframe }, ErrorVec[j][3]);
+				   pc.outputs().snapshot(Output{ "TST", "Error4", 0, Lifetime::Timeframe }, ErrorVec[j][4]);
+				   pc.outputs().snapshot(Output{ "TST", "Error5", 0, Lifetime::Timeframe }, ErrorVec[j][5]);
+				   pc.outputs().snapshot(Output{ "TST", "Error6", 0, Lifetime::Timeframe }, ErrorVec[j][6]);
+				   pc.outputs().snapshot(Output{ "TST", "Error7", 0, Lifetime::Timeframe }, ErrorVec[j][7]);
+				   pc.outputs().snapshot(Output{ "TST", "Error8", 0, Lifetime::Timeframe }, ErrorVec[j][8]);
+				   pc.outputs().snapshot(Output{ "TST", "Error9", 0, Lifetime::Timeframe }, ErrorVec[j][9]);
+				   */
 
 				//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
 				LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
@@ -371,10 +425,10 @@ namespace o2
 			*/
 
 			FolderNames.clear();
-		//	FileNames.clear();
+			//	FileNames.clear();
 			NewNextFold.clear();
 			FolderNames = NowFolderNames;
-		//	FileNames = NowFileNames;
+			//	FileNames = NowFileNames;
 
 			NowFolderNames.clear();
 			NowFileNames.clear();
@@ -384,7 +438,7 @@ namespace o2
 			LOG(INFO) << "Pushing Reset Histogram Decision";
 
 			cout << "Resetting Pushing Things" << endl;
-		
+
 			//Resetting a New File //
 			if(IndexPush >  mDigits.size() - 5){
 				mDigits.clear();
@@ -408,68 +462,69 @@ namespace o2
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-		}
-
-
-
-		std::vector<string> RawPixelReader::GetFName(std::string folder)
-		{
-
-			DIR           *dirp;
-			struct dirent *directory;
-
-			char cstr[folder.size()+1];
-			strcpy(cstr, folder.c_str());
-			dirp = opendir(cstr);
-			std::vector<string> names;
-			//string search_path = folder + "/*";
-			if(dirp){
-
-				while((directory = readdir(dirp)) != NULL){
-
-					//printf("%s\n", directory->d_name);
-
-					if ( !(!strcmp(directory->d_name, ".") || !strcmp(directory->d_name, ".."))) names.push_back(folder + "/" + directory->d_name);
-
-				}
-
-				closedir(dirp);
 			}
 
-			cout << "names size = " << names.size() << endl;
-			return(names);
+
+
+			std::vector<string> RawPixelReader::GetFName(std::string folder)
+			{
+
+				DIR           *dirp;
+				struct dirent *directory;
+
+				char cstr[folder.size()+1];
+				strcpy(cstr, folder.c_str());
+				dirp = opendir(cstr);
+				std::vector<string> names;
+				//string search_path = folder + "/*";
+				if(dirp){
+
+					while((directory = readdir(dirp)) != NULL){
+
+						//printf("%s\n", directory->d_name);
+
+						if ( !(!strcmp(directory->d_name, ".") || !strcmp(directory->d_name, ".."))) names.push_back(folder + "/" + directory->d_name);
+
+					}
+
+					closedir(dirp);
+				}
+
+				cout << "names size = " << names.size() << endl;
+				return(names);
+			}
+
+
+			DataProcessorSpec getRawPixelReaderSpec()
+			{
+				return DataProcessorSpec{
+					"Raw-Pixel-Reader",
+						Inputs{},
+						Outputs{
+							OutputSpec{ "ITS", "DIGITS", 0, Lifetime::Timeframe },
+							OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
+							OutputSpec{ "TST", "Error", 0, Lifetime::Timeframe },	
+							OutputSpec{ "TST", "Run", 0, Lifetime::Timeframe },	
+							OutputSpec{ "TST", "File", 0, Lifetime::Timeframe },	
+							/*
+							   OutputSpec{ "TST", "Error0", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error1", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error2", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error3", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error4", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error5", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error6", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error7", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error8", 0, Lifetime::Timeframe },
+							   OutputSpec{ "TST", "Error9", 0, Lifetime::Timeframe },
+							   */	
+							//		OutputSpec{ "TST", "TEST3", 0, Lifetime::Timeframe },			
+						},
+						AlgorithmSpec{ adaptFromTask<RawPixelReader>() },
+				};
+			}
+
+
+
 		}
-
-
-		DataProcessorSpec getRawPixelReaderSpec()
-		{
-			return DataProcessorSpec{
-				"Raw-Pixel-Reader",
-					Inputs{},
-					Outputs{
-						OutputSpec{ "ITS", "DIGITS", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
-						OutputSpec{ "TST", "Error", 0, Lifetime::Timeframe },	
-						OutputSpec{ "TST", "Run", 0, Lifetime::Timeframe },	
-						/*
-						OutputSpec{ "TST", "Error0", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error1", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error2", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error3", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error4", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error5", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error6", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error7", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error8", 0, Lifetime::Timeframe },
-						OutputSpec{ "TST", "Error9", 0, Lifetime::Timeframe },
-						*/	
-						//		OutputSpec{ "TST", "TEST3", 0, Lifetime::Timeframe },			
-					},
-					AlgorithmSpec{ adaptFromTask<RawPixelReader>() },
-			};
-		}
-
-
-
 	}
-}
