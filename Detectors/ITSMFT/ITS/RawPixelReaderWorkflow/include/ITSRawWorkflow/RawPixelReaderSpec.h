@@ -93,7 +93,7 @@ namespace o2
 			std::vector<int> NDigits;
 			std::vector<std::string> FolderNames;
 			std::vector<std::vector<std::string>> FileNames;
-			std::string workdir = "infiles";
+			std::string workdir;
 			std::vector<std::string> NowFolderNames;
 			std::vector<std::vector<std::string>> NowFileNames;
 			std::vector<std::string> DiffFolderName;
@@ -117,6 +117,9 @@ namespace o2
 			int RunName;
 			int TrackError;
 			int NEventPre;
+			double PercentDone;
+			int IndexPushEx;
+			
 		};
 
 		/// create a processor spec

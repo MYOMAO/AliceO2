@@ -39,6 +39,12 @@ namespace o2
 		{
 			IndexPush = 0;
 
+			std::ifstream EventPush("Config.dat");	
+			EventPush >> EventPerPush >> TrackError >> workdir;
+
+
+			LOG(INFO) << "EventPerPush = " << EventPerPush << "   TrackError = " << TrackError << "  workdir = " << workdir;
+
 
 			o2::base::GeometryManager::loadGeometry();
 
@@ -66,11 +72,6 @@ namespace o2
 				Error[i] = 0;
 			}
 
-			std::ifstream EventPush("Config.dat");	
-			EventPush >> EventPerPush >> TrackError;
-
-
-			LOG(INFO) << "EventPerPush = " << EventPerPush << "   TrackError = " << TrackError;
 
 
 			//		EventPerPush = 3000;
@@ -78,7 +79,6 @@ namespace o2
 			TotalPixelSize = 0;
 
 			//	GetFileName("infile");
-
 
 			//
 			o2::ITS::GeometryTGeo * geom = o2::ITS::GeometryTGeo::Instance ();
@@ -88,6 +88,7 @@ namespace o2
 			setNChips (numOfChips);	
 			j = 0;
 			FileDone = 1;
+			PercentDone = 0.0;
 
 
 
@@ -364,7 +365,12 @@ namespace o2
 			LOG(INFO) << "DONE Pushing";
 
 
-			LOG(INFO) << "IndexPush Before = " << IndexPush << "  mDigits.size() =  "  << mDigits.size(); 			
+			LOG(INFO) << "IndexPush Before = " << IndexPush << "  mDigits.size() =  "  << mDigits.size(); 
+			
+			if(mDigits.size() > 0) PercentDone = double(IndexPush)/double(mDigits.size());
+			cout<< "Percentage Processed = " << Form("%.2f",100.*PercentDone) << endl;
+
+		
 			if(IndexPush < mDigits.size()){
 				for(int i = 0; i < NDigits[j]; i++){
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
@@ -376,8 +382,12 @@ namespace o2
 				pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe }, RunName);
 				pc.outputs().snapshot(Output{ "TST", "File", 0, Lifetime::Timeframe }, FileID);
 
-
 				pc.outputs().snapshot(Output{ "TST", "Error", 0, Lifetime::Timeframe }, ErrorVec[j]);
+				IndexPushEx =  IndexPush + NDigits[j];
+				LOG(INFO) << "IndexPushEx = " << IndexPushEx << "  mDigits.size() " <<  mDigits.size();
+				if(IndexPushEx >  mDigits.size() - 5) FileDone = 1;
+				LOG(INFO) << "FileDone = " << FileDone;
+				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);
 
 				/*
 				   pc.outputs().snapshot(Output{ "TST", "Error0", 0, Lifetime::Timeframe }, ErrorVec[j][0]);
@@ -449,6 +459,8 @@ namespace o2
 				j = 0;
 				NDigits.clear();
 				FileDone = 1;
+				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);	
+				PercentDone = 0;
 			}
 
 			cout << "Start Sleeping Bro" << endl;
@@ -508,7 +520,8 @@ namespace o2
 							OutputSpec{ "TST", "TEST", 0, Lifetime::Timeframe },	
 							OutputSpec{ "TST", "Error", 0, Lifetime::Timeframe },	
 							OutputSpec{ "TST", "Run", 0, Lifetime::Timeframe },	
-							OutputSpec{ "TST", "File", 0, Lifetime::Timeframe },	
+							OutputSpec{ "TST", "File", 0, Lifetime::Timeframe },
+							OutputSpec{ "TST", "Finish", 0, Lifetime::Timeframe },		
 							/*
 							   OutputSpec{ "TST", "Error0", 0, Lifetime::Timeframe },
 							   OutputSpec{ "TST", "Error1", 0, Lifetime::Timeframe },
