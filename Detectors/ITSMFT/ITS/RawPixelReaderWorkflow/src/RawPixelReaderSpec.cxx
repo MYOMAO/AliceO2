@@ -89,6 +89,7 @@ namespace o2
 			j = 0;
 			FileDone = 1;
 			PercentDone = 0.0;
+			FileRemain = 0;
 
 
 
@@ -210,7 +211,7 @@ namespace o2
 
 				//	for(int j = 0; j < DiffFileNames[i].size(); j++){
 				if(DiffFileNames[i].size() > 0 && FileDone == 1){ 
-
+					FileRemain = DiffFileNames[i].size();
 					FileDone = 0;
 					cout << "RunID = " << RunID << endl;
 					cout << "File Location = " << DiffFileNames[i][0] << endl;
@@ -313,10 +314,11 @@ namespace o2
 						if(Error[7]  < 107374082)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
 						if(Error[8]  < 107374082)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
 						if(Error[9]  < 107374082)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
+						if(Error[10]  < 107374082)	Error[10] = Error[10]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPacketCounterJump];
 
 						if(TrackError == 1){
 							if(NEventPre != NEvent){
-								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0 ||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0){
+								if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader] > 0||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes] > 0 ||(int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0 ||  (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0 || (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPacketCounterJump] > 0){
 									fout << "Event Number = " << NEvent   << endl;
 									fout << " ------------------------------------------------"   << endl;	
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity] > 0) fout << "Error ID 1: ErrPageCounterDiscontinuity Is Detected"  << endl;
@@ -329,6 +331,8 @@ namespace o2
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane] > 0) fout << "Error ID 8: ErrNoDataForActiveLane Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 9: ErrIBChipLaneMismatch Is Detected"  << endl;
 									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch] > 0) fout << "Error ID 10: ErrCableDataHeadWrong Is Detected"  << endl;
+									if((int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPacketCounterJump] > 0) fout << "Error ID 11: ErrPacketCounterJump Is Detected"  << endl;
+
 									fout << " ------------------------------------------------"  << endl;
 								}
 							}
@@ -344,7 +348,7 @@ namespace o2
 
 							//			LOG(INFO) << "Chip ID Before " << ChipID << " Row = " << row << "   Column = " << col;
 
-							mDigits.emplace_back(ChipID, Index, row, col, NEvent);
+							mDigits.emplace_back(ChipID, NEvent, row, col, 0);
 							//			LOG(INFO) << "Chip ID After " << mDigits[Index].getChipIndex() << " Row = " << mDigits[Index].getRow() << "   Column = " << mDigits[Index].getColumn();
 							Index = Index + 1;
 						}
@@ -370,7 +374,7 @@ namespace o2
 			if(mDigits.size() > 0) PercentDone = double(IndexPush)/double(mDigits.size());
 			cout<< "Percentage Processed = " << Form("%.2f",100.*PercentDone) << endl;
 
-		
+	
 			if(IndexPush < mDigits.size()){
 				for(int i = 0; i < NDigits[j]; i++){
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
@@ -387,7 +391,11 @@ namespace o2
 				LOG(INFO) << "IndexPushEx = " << IndexPushEx << "  mDigits.size() " <<  mDigits.size();
 				if(IndexPushEx >  mDigits.size() - 5) FileDone = 1;
 				LOG(INFO) << "FileDone = " << FileDone;
-				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);
+				LOG(INFO) << "FileRemain = " << FileRemain;
+	
+				FileInfo = FileDone + FileRemain * 10;
+
+				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileInfo);
 
 				/*
 				   pc.outputs().snapshot(Output{ "TST", "Error0", 0, Lifetime::Timeframe }, ErrorVec[j][0]);
@@ -424,16 +432,11 @@ namespace o2
 			/*
 			   LOG(INFO) << "Before:  " << "IndexPush = " << IndexPush << "     mDigits.size() = " <<  mDigits.size(); 
 			   while(IndexPush < mDigits.size()){
-
 			//	LOG(INFO) << "mDigits.size() = " << mDigits.size();
 			pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits[IndexPush++]);
 			if(IndexPush%100000==0) 	LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
-
 			}
 			//pc.services().get<ControlService>().readyToQuit(true);
-
-
-
 			LOG(INFO) << "After:  " << "IndexPush = " << IndexPush << "     mDigits.size() = " <<  mDigits.size(); 
 			*/
 

@@ -105,7 +105,7 @@ namespace o2
 			int EventPerPush;
 			int EventRegistered;
 			int TotalPixelSize;
-			static constexpr int  NError = 10;
+			static constexpr int  NError = 11;
 //			unsigned int Error[NError];
 			std::array<unsigned int,NError> Error;
 			int pos;
@@ -119,7 +119,8 @@ namespace o2
 			int NEventPre;
 			double PercentDone;
 			int IndexPushEx;
-			
+			int FileRemain;
+			int FileInfo;
 		};
 
 		/// create a processor spec
@@ -130,3 +131,4 @@ namespace o2
 } // namespace o2
 
 #endif /* O2_ITS_DIGITREADER */
+
