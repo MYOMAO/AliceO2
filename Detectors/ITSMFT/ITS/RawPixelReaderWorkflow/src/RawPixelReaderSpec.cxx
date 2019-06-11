@@ -304,17 +304,17 @@ namespace o2
 						if(NEvent%100000 != 0 ) TimePrint = 0;
 
 
-						if(Error[0]  < 107374082)  Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
-						if(Error[1]  < 107374082)	Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
-						if(Error[2]  < 107374082)	Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
-						if(Error[3]  < 107374082)	Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
-						if(Error[4]  < 107374082)	Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
-						if(Error[5]  < 107374082)	Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
-						if(Error[6]  < 107374082)	Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
-						if(Error[7]  < 107374082)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
-						if(Error[8]  < 107374082)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
-						if(Error[9]  < 107374082)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
-						if(Error[10]  < 107374082)	Error[10] = Error[10]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPacketCounterJump];
+						if(Error[0]  < 4294967295)  Error[0] = Error[0]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPageCounterDiscontinuity];
+						if(Error[1]  < 4294967295)	Error[1] = Error[1]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrRDHvsGBTHPageCnt];
+						if(Error[2]  < 4294967295)	Error[2] = Error[2]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTHeader];
+						if(Error[3]  < 4294967295)	Error[3] = Error[3]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrMissingGBTTrailer];
+						if(Error[4]  < 4294967295)	Error[4] = Error[4]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNonZeroPageAfterStop];
+						if(Error[5]  < 4294967295)	Error[5] = Error[5]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrUnstoppedLanes];  
+						if(Error[6]  < 4294967295)	Error[6] = Error[6]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrDataForStoppedLane];
+						if(Error[7]  < 4294967295)	Error[7] = Error[7]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrNoDataForActiveLane];
+						if(Error[8]  < 4294967295)	Error[8] = Error[8]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrIBChipLaneMismatch];
+						if(Error[9]  < 4294967295)	Error[9] = Error[9]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrCableDataHeadWrong];
+						if(Error[10]  < 4294967295)	Error[10] = Error[10]  + (int)statRU->errorCounts[o2::itsmft::GBTLinkDecodingStat::ErrPacketCounterJump];
 
 						if(TrackError == 1){
 							if(NEventPre != NEvent){
