@@ -121,6 +121,7 @@ namespace o2
 			int IndexPushEx;
 			int FileRemain;
 			int FileInfo;
+			int RunType;
 		};
 
 		/// create a processor spec

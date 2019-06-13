@@ -39,11 +39,24 @@ namespace o2
 		{
 			IndexPush = 0;
 
-			std::ifstream EventPush("Config.dat");	
-			EventPush >> EventPerPush >> TrackError >> workdir;
+			std::ifstream RunFileType("Config/RunType.dat");	
+			RunFileType >> RunType;
+		
+			LOG(INFO) <<  "OLD CONFIG: RunFileType = " << RunType;
 
 
-			LOG(INFO) << "EventPerPush = " << EventPerPush << "   TrackError = " << TrackError << "  workdir = " << workdir;
+			if(RunType == 0){
+				std::ifstream EventPush("Config/ConfigFakeRate.dat");	
+				EventPush >> EventPerPush >> TrackError >> workdir;
+			}
+
+			if(RunType == 1){
+				std::ifstream EventPush("Config/ConfigThreshold.dat");	
+				EventPush >> EventPerPush >> TrackError >> workdir;
+			}
+
+			LOG(INFO) <<  "OLD CONFIG: EventPerPush = " << EventPerPush << "   TrackError = " << TrackError << "  workdir = " << workdir;
+			LOG(INFO) << "DONE Reset Histogram Decision";
 
 
 			o2::base::GeometryManager::loadGeometry();
@@ -113,8 +126,6 @@ namespace o2
 			cout << "Wake Up Bro" << endl;
 
 			cout << "Old Folder Size = " << FolderNames.size() << endl;
-
-
 			NowFolderNames = GetFName(workdir);
 
 
@@ -158,6 +169,23 @@ namespace o2
 				}
 				ErrorVec.clear();
 				ResetCommand = 0;	
+
+				std::ifstream RunFileType("Config/RunType.dat");	
+				RunFileType >> RunType;
+
+				LOG(INFO) <<  "NEW CONFIG: RunFileType = " << RunType;
+
+				if(RunType == 0){
+					std::ifstream EventPush("Config/ConfigFakeRate.dat");	
+					EventPush >> EventPerPush >> TrackError >> workdir;
+				}
+
+				if(RunType == 1){
+					std::ifstream EventPush("Config/ConfigThreshold.dat");	
+					EventPush >> EventPerPush >> TrackError >> workdir;
+				}
+
+				LOG(INFO) <<  "NEW CONFIG: EventPerPush = " << EventPerPush << "   TrackError = " << TrackError << "  workdir = " << workdir;
 				LOG(INFO) << "DONE Reset Histogram Decision";
 
 			}
@@ -296,7 +324,7 @@ namespace o2
 							TotalPixelSize = 0;
 						}
 
-						if (NEvent%100000==0 && TimePrint == 0){
+						if (NEvent%1000000==0 && TimePrint == 0){
 							cout << "Event Number = " << NEvent   << endl;
 							TimePrint = 1;
 						}
@@ -370,16 +398,18 @@ namespace o2
 
 
 			LOG(INFO) << "IndexPush Before = " << IndexPush << "  mDigits.size() =  "  << mDigits.size(); 
-			
+
 			if(mDigits.size() > 0) PercentDone = double(IndexPush)/double(mDigits.size());
 			cout<< "Percentage Processed = " << Form("%.2f",100.*PercentDone) << endl;
 
-	
+
 			if(IndexPush < mDigits.size()){
 				for(int i = 0; i < NDigits[j]; i++){
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
 				}
 				LOG(INFO) << "j = " << j << "   NDgits = " << NDigits[j]  << "    mMultiDigits Pushed = " << mMultiDigits.size();
+				LOG(INFO) << "i = " << 10 << "  ErrorShould = " << Error[10] << "  ErrorInjected = " << ErrorVec[j][10];;
+
 
 				cout << "RunIDS = " << RunName << "   FileIDS = " << FileID << endl;
 
@@ -392,7 +422,7 @@ namespace o2
 				if(IndexPushEx >  mDigits.size() - 5) FileDone = 1;
 				LOG(INFO) << "FileDone = " << FileDone;
 				LOG(INFO) << "FileRemain = " << FileRemain;
-	
+
 				FileInfo = FileDone + FileRemain * 10;
 
 				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileInfo);
@@ -464,6 +494,7 @@ namespace o2
 				FileDone = 1;
 				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);	
 				PercentDone = 0;
+				ErrorVec.clear();
 			}
 
 			cout << "Start Sleeping Bro" << endl;
