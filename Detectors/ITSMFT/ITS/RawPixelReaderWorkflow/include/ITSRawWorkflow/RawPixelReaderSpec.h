@@ -132,12 +132,15 @@ namespace o2
 			std::chrono::time_point<std::chrono::high_resolution_clock> end;
 			int difference;
 			int Printed;
+			
 			//Immediate Injection Variables//
-	
+
 			int NewFileInj;
+			int	NewFileInjAction;
 			std::vector<o2::itsmft::Digit> mDigitsTest;
 			std::vector<o2::itsmft::Digit> mMultiDigitsTest;
 			std::vector<std::array<unsigned int,NError>> ErrorVecTest;	
+			int MaxPixelSize;
 		};
 
 		/// create a processor spec

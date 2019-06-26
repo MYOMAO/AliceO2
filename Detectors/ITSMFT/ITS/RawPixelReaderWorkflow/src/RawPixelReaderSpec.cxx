@@ -107,7 +107,7 @@ namespace o2
 			difference = 0;
 			differenceDecoder = 0;
 			NewFileInj = 1;
-
+			MaxPixelSize = 58700095;
 		}
 
 
@@ -167,7 +167,7 @@ namespace o2
 				}
 				ErrorVec.clear();
 				ResetCommand = 0;	
-
+				NewFileInj = 1;
 				std::ifstream RunFileType("Config/RunType.dat");	
 				RunFileType >> RunType;
 
@@ -290,26 +290,6 @@ namespace o2
 					EventRegistered = 0;
 					LOG(INFO) << "inpName = " << inpName;
 
-					o2::itsmft::RawPixelReader<o2::itsmft::ChipMappingITS> rawReader;		
-					rawReader.setPadding128(true); // payload GBT words are padded to 16B
-					rawReader.setVerbosity(0);
-					rawReader.setMinTriggersToCache(1025);
-
-					rawReader.openInput(inpName);
-					//mDigits.clear();
-					//mMultiDigits.clear();
-
-					int Index = 0;
-					int IndexMax = -1;
-					int NChip = 0;
-					int NChipMax = -1;
-					int TimePrint = 0;
-					using RawReader=o2::itsmft::RawPixelReader<o2::itsmft::ChipMappingITS>;
-					auto &rawErrorReader = reinterpret_cast<RawReader&>(rawReader);
-
-
-					startDecoder = std::chrono::high_resolution_clock::now();
-
 					//Inject fake thing Now//
 
 					if(NewFileInj == 1){
@@ -335,6 +315,29 @@ namespace o2
 
 					//DONE Inhection//
 
+
+					o2::itsmft::RawPixelReader<o2::itsmft::ChipMappingITS> rawReader;		
+					rawReader.setPadding128(true); // payload GBT words are padded to 16B
+					rawReader.setVerbosity(0);
+					rawReader.setMinTriggersToCache(1025);
+
+					rawReader.openInput(inpName);
+					//mDigits.clear();
+					//mMultiDigits.clear();
+
+					int Index = 0;
+					int IndexMax = -1;
+					int NChip = 0;
+					int NChipMax = -1;
+					int TimePrint = 0;
+					using RawReader=o2::itsmft::RawPixelReader<o2::itsmft::ChipMappingITS>;
+					auto &rawErrorReader = reinterpret_cast<RawReader&>(rawReader);
+
+
+					startDecoder = std::chrono::high_resolution_clock::now();
+
+
+
 					while (mChipData = rawReader.getNextChipData(mChips)) {
 						if(NChip < NChipMax) break;
 						//	cout << "Pass Chip" << endl;
@@ -353,10 +356,26 @@ namespace o2
 
 
 						if(NEvent > (EventRegistered + 1) * EventPerPush){
-							NDigits.push_back(TotalPixelSize);
-							EventRegistered = EventRegistered + 1;
-							ErrorVec.push_back(Error);
-							cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed"  << endl; 
+
+							if(TotalPixelSize < MaxPixelSize || TotalPixelSize == MaxPixelSize){
+								cout << "Digit OK for 1 Push" << endl;
+								NDigits.push_back(TotalPixelSize);
+								EventRegistered = EventRegistered + 1;
+								ErrorVec.push_back(Error);
+								cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed"  << endl; 
+							}
+
+							if(TotalPixelSize > MaxPixelSize){
+								cout << "Digit Spilt into 2 Pusbhes" << endl;
+								NDigits.push_back(TotalPixelSize/2);
+								NDigits.push_back(TotalPixelSize/2);
+								ErrorVec.push_back(Error);
+								ErrorVec.push_back(Error);
+								EventRegistered = EventRegistered + 1;
+								cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed"  << endl; 
+							}
+
+
 							TotalPixelSize = 0;
 						}
 
@@ -436,7 +455,7 @@ namespace o2
 				}
 			}
 
-			
+
 
 			LOG(INFO) << "DONE Pushing";
 
@@ -534,13 +553,13 @@ namespace o2
 				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);	
 				PercentDone = 0;
 				ErrorVec.clear();
-				NewFileInj = 1;
+
 			}
 
 
 			//if(NewFileInjAction == 1){
-		//		NewFileInjAction = 0;
-		//	}
+			//		NewFileInjAction = 0;
+			//	}
 
 			cout << "Start Sleeping Bro" << endl;
 			cout << " " << endl;
@@ -553,7 +572,7 @@ namespace o2
 			cout << " " << endl;
 			cout << " " << endl;
 			cout << " " << endl;	
-	
+
 
 
 
@@ -565,7 +584,7 @@ namespace o2
 				timefout << "SUMMARY TIMING (1/18 of a file): Event Per Push = " <<  EventPerPush << "   Time Takes to Decode = "  << differenceDecoder/1000.0 << " s "  	<< "   Time Takes to Complete = "  << difference/1000.0 << " s " << " Decoding Time Percentage = " << double(differenceDecoder)/double(difference) * 100<< "%" << endl;				
 				Printed = 1;
 			}
-		
+
 
 			}
 
