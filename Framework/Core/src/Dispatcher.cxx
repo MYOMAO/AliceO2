@@ -74,6 +74,8 @@ void Dispatcher::run(ProcessingContext& ctx)
 
 void Dispatcher::send(DataAllocator& dataAllocator, const DataRef& inputData, const Output& output) const
 {
+    const auto* inputHeader = header::get<header::DataHeader*>(inputData.header);
+	/*
   //todo: support other serialization methods
   const auto* inputHeader = header::get<header::DataHeader*>(inputData.header);
   if (inputHeader->payloadSerializationMethod == header::gSerializationMethodInvalid) {
@@ -87,6 +89,8 @@ void Dispatcher::send(DataAllocator& dataAllocator, const DataRef& inputData, co
     auto& outputMessage = dataAllocator.newChunk(output, inputHeader->payloadSize);
     memcpy(outputMessage.data(), inputData.payload, inputHeader->payloadSize);
   }
+  */
+  dataAllocator.snapshot(output, inputData.payload, inputHeader->payloadSize, inputHeader->payloadSerializationMethod);	
 }
 
 // ideally this should be in a separate proxy device or use Lifetime::External

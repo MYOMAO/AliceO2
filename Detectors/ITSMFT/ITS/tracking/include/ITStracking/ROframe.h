@@ -24,6 +24,7 @@
 #include "ITStracking/Cluster.h"
 #include "ITStracking/Constants.h"
 
+#include "ReconstructionDataFormats/Vertex.h"
 #include "SimulationDataFormat/MCCompLabel.h"
 #include "SimulationDataFormat/MCTruthContainer.h"
 
@@ -31,6 +32,8 @@ namespace o2
 {
 namespace ITS
 {
+
+using Vertex = o2::dataformats::Vertex<o2::dataformats::TimeStamp<int>>;
 
 class ROframe final
 {
@@ -40,6 +43,7 @@ class ROframe final
   const float3& getPrimaryVertex(const int) const;
   int getPrimaryVerticesNum() const;
   void addPrimaryVertex(const float, const float, const float);
+  void addPrimaryVertices(std::vector<Vertex> vertices);
   void addPrimaryReconstructedVertex(const float, const float, const float);
   void printPrimaryVertices() const;
   int getTotalClusters() const;
@@ -47,11 +51,13 @@ class ROframe final
   const std::array<std::vector<Cluster>, Constants::ITS::LayersNumber>& getClusters() const;
   const std::vector<Cluster>& getClustersOnLayer(int layerId) const;
   const std::vector<TrackingFrameInfo>& getTrackingFrameInfoOnLayer(int layerId) const;
+  const std::array<std::vector<TrackingFrameInfo>, Constants::ITS::LayersNumber>& getTrackingFrameInfo() const;
 
   const TrackingFrameInfo& getClusterTrackingFrameInfo(int layerId, const Cluster& cl) const;
   const MCCompLabel& getClusterLabels(int layerId, const Cluster& cl) const;
   const MCCompLabel& getClusterLabels(int layerId, const int clId) const;
   int getClusterExternalIndex(int layerId, const int clId) const;
+  std::vector<int> getTracksId(const int layerId, const std::vector<Cluster>& cl);
 
   template <typename... T>
   void addClusterToLayer(int layer, T&&... args);
@@ -92,6 +98,11 @@ inline const std::vector<TrackingFrameInfo>& ROframe::getTrackingFrameInfoOnLaye
   return mTrackingFrameInfo[layerId];
 }
 
+inline const std::array<std::vector<TrackingFrameInfo>, Constants::ITS::LayersNumber>& ROframe::getTrackingFrameInfo() const
+{
+  return mTrackingFrameInfo;
+}
+
 inline const TrackingFrameInfo& ROframe::getClusterTrackingFrameInfo(int layerId, const Cluster& cl) const
 {
   return mTrackingFrameInfo[layerId][cl.clusterId];
@@ -110,6 +121,15 @@ inline const MCCompLabel& ROframe::getClusterLabels(int layerId, const int clId)
 inline int ROframe::getClusterExternalIndex(int layerId, const int clId) const
 {
   return mClusterExternalIndices[layerId][clId];
+}
+
+inline std::vector<int> ROframe::getTracksId(const int layerId, const std::vector<Cluster>& cl)
+{
+  std::vector<int> tracksId;
+  for (auto& cluster : cl) {
+    tracksId.push_back(getClusterLabels(layerId, cluster).getTrackID());
+  }
+  return tracksId;
 }
 
 template <typename... T>

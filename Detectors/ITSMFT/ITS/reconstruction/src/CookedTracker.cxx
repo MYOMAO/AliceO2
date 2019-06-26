@@ -35,7 +35,7 @@
 #include "SimulationDataFormat/MCTruthContainer.h"
 
 using namespace o2::ITS;
-using namespace o2::ITSMFT;
+using namespace o2::itsmft;
 using namespace o2::constants::math;
 using namespace o2::utils;
 using o2::field::MagneticField;
@@ -137,7 +137,7 @@ void CookedTracker::setExternalIndices(TrackITS& t) const
   for (Int_t i = 0; i < noc; i++) {
     Int_t index = t.getClusterIndex(i);
     const Cluster* c = getCluster(index);
-    Int_t idx = c - mFirstCluster; // Index of this cluster in event
+    Int_t idx = c - mFirstCluster - mFirstInFrame; // Index of this cluster in event
     t.setExternalClusterIndex(i, idx);
   }
 }
@@ -479,7 +479,7 @@ std::vector<TrackITS> CookedTracker::trackInThread(Int_t first, Int_t last)
 }
 
 void CookedTracker::process(const std::vector<Cluster>& clusters, std::vector<TrackITS>& tracks,
-                            std::vector<o2::ITSMFT::ROFRecord>& rofs)
+                            std::vector<o2::itsmft::ROFRecord>& rofs)
 {
   //--------------------------------------------------------------------
   // This is the main tracking function
@@ -516,9 +516,6 @@ void CookedTracker::process(const std::vector<Cluster>& clusters, std::vector<Tr
     LOG(INFO) << "Processing time/clusters for single frame : " << diff.count() << " / " << nClFrame << " s" << FairLogger::endl;
 
     start = end;
-    if (!mContinuousMode)
-      break;    // Done, if in triggered mode
-    mROFrame++; // Increment the RO frame ID and go on, if in continuous mode
   }
 }
 
@@ -533,7 +530,6 @@ void CookedTracker::processFrame(std::vector<TrackITS>& tracks)
   if (!numOfClusters) {
     return;
   }
-  LOG(INFO) << "CookedTracker::process(), number of threads: " << mNumOfThreads << " for " << numOfClusters << " clusters";
 
   std::vector<std::future<std::vector<TrackITS>>> futures(mNumOfThreads);
   std::vector<std::vector<TrackITS>> seedArray(mNumOfThreads);
@@ -559,7 +555,6 @@ void CookedTracker::processFrame(std::vector<TrackITS>& tracks)
         mTrkLabels->addElement(idx, label);
       }
       setExternalIndices(track);
-      track.setROFrame(mROFrame);
       tracks.push_back(track);
     }
   }
@@ -609,18 +604,16 @@ bool CookedTracker::makeBackPropParam(TrackITS& track) const
   return true;
 }
 
-int CookedTracker::loadClusters(const std::vector<Cluster>& clusters, const o2::ITSMFT::ROFRecord& rof)
+int CookedTracker::loadClusters(const std::vector<Cluster>& clusters, const o2::itsmft::ROFRecord& rof)
 {
   //--------------------------------------------------------------------
   // This function reads the ITSU clusters from the tree,
   // sort them, distribute over the internal tracker arrays, etc
   //--------------------------------------------------------------------
-  int first = 0;
-  int number = clusters.size();
-  if (mContinuousMode) { // Load clusters from this ROFrame only, if in continuous mode
-    first = rof.getROFEntry().getIndex();
-    number = rof.getNROFEntries();
-  }
+  auto first = rof.getROFEntry().getIndex();
+  auto number = rof.getNROFEntries();
+
+  mFirstInFrame = first;
 
   auto clusters_in_frame = gsl::make_span(&clusters[first], number);
   for (const auto& c : clusters_in_frame) {

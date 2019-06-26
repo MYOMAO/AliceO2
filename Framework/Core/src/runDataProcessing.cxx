@@ -349,11 +349,11 @@ void processChildrenOutput(DriverInfo& driverInfo, DeviceInfos& infos, DeviceSpe
   if (numFd == 0) {
     return;
   }
+
   for (int si = 0; si < driverInfo.maxFd; ++si) {
     if (FD_ISSET(si, &fdset)) {
       assert(driverInfo.socket2DeviceInfo.find(si) != driverInfo.socket2DeviceInfo.end());
       auto& info = infos[driverInfo.socket2DeviceInfo[si]];
-
       bool fdActive = getChildData(si, info);
       // If the pipe was closed due to the process exiting, we
       // can avoid the select.
