@@ -204,11 +204,15 @@ namespace o2
 
 			LOG(INFO) << "DONE GRABING Existing";
 
-			if(TimeCounter == 0){
+			if(TimeCounter == 0 && DiffFileNames.size() ==  NowFolderNames.size()){
+				cout << "DiffFileNames Size = " << DiffFileNames.size() << "  NowFolderNames Size = " << NowFolderNames.size() << endl;
 				for (int i = 0; i < NowFolderNames.size(); i++){
 					if(DiffFileNames[i].size() > 0) TimeCounter = 1;
 				}				
 			}
+
+
+
 			if(TimeCounter == 1){
 				start = std::chrono::high_resolution_clock::now();
 				TimeCounter = 2;
