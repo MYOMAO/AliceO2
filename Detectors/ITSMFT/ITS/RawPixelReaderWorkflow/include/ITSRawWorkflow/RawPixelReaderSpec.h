@@ -141,6 +141,7 @@ namespace o2
 			std::vector<o2::itsmft::Digit> mMultiDigitsTest;
 			std::vector<std::array<unsigned int,NError>> ErrorVecTest;	
 			int MaxPixelSize;
+			int EmptyCount;
 		};
 
 		/// create a processor spec

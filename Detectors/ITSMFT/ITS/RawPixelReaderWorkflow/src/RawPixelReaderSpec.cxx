@@ -108,6 +108,7 @@ namespace o2
 			differenceDecoder = 0;
 			NewFileInj = 1;
 			MaxPixelSize = 58700095;
+			EmptyCount = 0;
 		}
 
 
@@ -194,12 +195,26 @@ namespace o2
 
 
 			LOG(INFO) << "Get IN LOOP";
+		
+
 			for(int i = 0;  i < FolderNames.size(); i++){
+                cout << "i = " << i <<  "   FileNames[i].size()  "<<  FileNames[i].size() << endl;
+			
+				if(FileNames[i].size() > 0){
+
+				cout << "Start Comparison" << endl;
 				std::set_difference(NowFileNames[i].begin(), NowFileNames[i].end(), FileNames[i].begin(), FileNames[i].end(),std::inserter(DiffFileNamePush, DiffFileNamePush.begin()));
 				DiffFileNames.push_back(DiffFileNamePush);
 				cout << "Difference File Size Between New and Initial Runs " <<   DiffFileNames[i].size() << endl;
-
 				DiffFileNamePush.clear();
+				
+				}
+			
+				
+				if(FileNames[i].size() == 0)	EmptyCount = EmptyCount + 1;
+				
+				cout << "EmptyCount = " << EmptyCount << endl;
+
 			}
 
 			LOG(INFO) << "DONE GRABING Existing";
@@ -219,10 +234,12 @@ namespace o2
 				cout << "STARTED CLOCK" << endl;
 			}
 
-			for(int i = FolderNames.size();  i < NowFolderNames.size(); i++){
+			for(int i = FolderNames.size() - EmptyCount;  i < NowFolderNames.size(); i++){
 				DiffFileNames.push_back(NowFileNames[i]);
 				cout << "New File Size Between New and Initial Runs " <<   DiffFileNames[i].size() << endl;
 			}	
+
+			EmptyCount = 0; 
 
 			LOG(INFO) << "Total New Files = " << DiffFileNames.size();
 
