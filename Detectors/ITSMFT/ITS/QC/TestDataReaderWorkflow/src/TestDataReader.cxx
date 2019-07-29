@@ -23,7 +23,7 @@
 #include "DataFormatsITSMFT/ROFRecord.h"
 #include "ITSMFTReconstruction/RawPixelReader.h"
 #include "CommonDataFormat/InteractionRecord.h"
-#include "DataReaderWorkflow/TestDataReader.h"
+#include "ITSQCDataReaderWorkflow/TestDataReader.h"
 #include "DetectorsBase/GeometryManager.h"
 #include <TCanvas.h>
 #include <iostream>
@@ -474,7 +474,7 @@ void TestDataReader::run(ProcessingContext& pc)
     j = 0;
     mNDigits.clear();
     mFileDone = 1;
-    pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, mFileDone);
+    pc.outputs().snapshot(Output{ "ITS", "Finish", 0, Lifetime::Timeframe }, mFileDone);
     PercentDone = 0;
     mErrorsVec.clear();
   }

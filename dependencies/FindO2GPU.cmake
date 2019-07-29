@@ -34,24 +34,32 @@ if(ENABLE_CUDA)
   endif()
   set(CMAKE_CUDA_STANDARD 14)
   set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+  find_package(cub)
+  set_package_properties(cub PROPERTIES TYPE OPTIONAL)
   include(CheckLanguage)
   check_language(CUDA)
-  if(CMAKE_CUDA_COMPILER)
+  if(CMAKE_CUDA_COMPILER AND CUB_FOUND)
     enable_language(CUDA)
     get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
     if(NOT CUDA IN_LIST LANGUAGES)
       message(FATAL_ERROR "CUDA was found but cannot be enabled")
     endif()
+    find_path(THRUST_INCLUDE_DIR thrust/version.h PATHS ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES} NO_DEFAULT_PATH)
+    if(THRUST_INCLUDE_DIR STREQUAL "THRUST_INCLUDE_DIR-NOTFOUND")
+      message(FATAL_ERROR "CUDA found but thrust not available")
+    endif()
 
-    set(CMAKE_CUDA_FLAGS "--expt-relaxed-constexpr")
-    set(CMAKE_CUDA_FLAGS_DEBUG "-Xptxas -O0 -Xcompiler -O0")
-    set(CMAKE_CUDA_FLAGS_RELEASE "-Xptxas -O4 -Xcompiler -O4 -use_fast_math")
-    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELEASE}")
-    set(CMAKE_CUDA_FLAGS_COVERAGE "${CMAKE_CUDA_FLAGS_RELEASE}")
+    # Forward CXX flags to CUDA C++ Host compiler (for warnings, gdb, etc.)
+    STRING(REGEX REPLACE "\-std=[^ ]*" "" CMAKE_CXX_FLAGS_NOSTD ${CMAKE_CXX_FLAGS}) # Need to strip c++17 imposed by alidist defaults
+    set(CMAKE_CUDA_FLAGS "-Xcompiler \"${CMAKE_CXX_FLAGS_NOSTD}\" --expt-relaxed-constexpr -Xptxas -v")
+    set(CMAKE_CUDA_FLAGS_DEBUG "-Xcompiler \"${CMAKE_CXX_FLAGS_DEBUG}\" -Xptxas -O0 -Xcompiler -O0")
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+      set(CMAKE_CUDA_FLAGS_${CMAKE_BUILD_TYPE} "-Xcompiler \"${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}\" -Xptxas -O4 -Xcompiler -O4 -use_fast_math")
+    endif()
     if(CUDA_COMPUTETARGET)
       set(
         CMAKE_CUDA_FLAGS
-        "${CMAKE_CUDA_FLAGS} -gencode arch=compute_${CUDA_COMPUTETARGET},code=compute_${CUDA_COMPUTETARGET}"
+        "${CMAKE_CUDA_FLAGS} -gencode arch=compute_${CUDA_COMPUTETARGET},code=sm_${CUDA_COMPUTETARGET}"
         )
     endif()
 
@@ -90,17 +98,29 @@ endif()
 
 # Detect and enable OpenCL 2.x
 if(ENABLE_OPENCL2)
+  find_package(LLVM)
+  if(LLVM_FOUND)
+    find_package(Clang)
+  endif()
+  find_package(ROCM PATHS /opt/rocm)
+  if(NOT ROCM_DIR STREQUAL "ROCM_DIR-NOTFOUND")
+    get_filename_component(ROCM_ROOT "${ROCM_DIR}/../../../" ABSOLUTE)
+  else()
+    set(ROCM_ROOT "/opt/rocm")
+  endif()
+  find_program(CLANG_OCL clang-ocl PATHS "${ROCM_ROOT}/bin")
   if(OpenCL_VERSION_STRING VERSION_GREATER_EQUAL 2.0
      AND Clang_FOUND
      AND LLVM_FOUND
-     AND LLVM_PACKAGE_VERSION VERSION_GREATER_EQUAL 9.0)
+     AND LLVM_PACKAGE_VERSION VERSION_GREATER_EQUAL 10.0
+     AND NOT CLANG_OCL STREQUAL "CLANG_OCL-NOTFOUND")
     set(OPENCL2_ENABLED ON)
     message(
       STATUS
-        "Found OpenCL 2 (${OpenCL_VERSION_STRING} compiled by LLVM/Clang ${LLVM_PACKAGE_VERSION})"
+        "Found OpenCL 2 (${OpenCL_VERSION_STRING} compiled by LLVM/Clang ${LLVM_PACKAGE_VERSION} / ${CLANG_OCL})"
       )
   elseif(NOT ENABLE_OPENCL2 STREQUAL "AUTO")
-    # message(FATAL_ERROR "OpenCL 2.x not yet implemented")
+    message(FATAL_ERROR "OpenCL 2.x not yet implemented")
   endif()
 endif()
 
@@ -133,10 +153,16 @@ if(ENABLE_HIP)
     get_filename_component(hip_ROOT "${HIP_PATH}" ABSOLUTE)
     get_filename_component(hcc_ROOT "${HCC_HOME}" ABSOLUTE)
     find_package(hip)
+    find_package(hipcub)
+    find_package(rocthrust)
     if(ENABLE_HIP STREQUAL "AUTO")
       set_package_properties(hip PROPERTIES TYPE OPTIONAL)
+      set_package_properties(hipcub PROPERTIES TYPE OPTIONAL)
+      set_package_properties(rocthrust PROPERTIES TYPE OPTIONAL)
     else()
       set_package_properties(hip PROPERTIES TYPE REQUIRED)
+      set_package_properties(hipcub PROPERTIES TYPE REQUIRED)
+      set_package_properties(rocthrust PROPERTIES TYPE REQUIRED)
     endif()
     if(hip_HIPCC_EXECUTABLE)
       set(HIP_ENABLED ON)
@@ -153,4 +179,3 @@ endif()
 
 # if we end up here without a FATAL, it means we have found the "O2GPU" package
 set(O2GPU_FOUND TRUE)
-

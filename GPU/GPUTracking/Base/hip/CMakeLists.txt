@@ -11,17 +11,21 @@
 set(MODULE GPUTrackingHIP)
 
 set(CMAKE_CXX_COMPILER ${hip_HIPCC_EXECUTABLE})
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-message(STATUS "Building GPUTracking with HIP support")
+if(DEFINED HIP_AMDGPUTARGET)
+  set(TMP_TARGET "(GPU Target ${HIP_AMDGPUTARGET})")
+endif()
+message(STATUS "Building GPUTracking with HIP support ${TMP_TARGET}")
 
-set(SRCS GPUReconstructionHIP.hip.cpp)
+set(SRCS GPUReconstructionHIP.hip.cxx)
 set(HDRS GPUReconstructionHIP.h GPUReconstructionHIPInternals.h)
 
 if(ALIGPU_BUILD_TYPE STREQUAL "O2")
   o2_add_library(
     ${MODULE}
     SOURCES ${SRCS}
-    PUBLIC_LINK_LIBRARIES O2::GPUTracking hip::host hip::device
+    PUBLIC_LINK_LIBRARIES O2::GPUTracking hip::host hip::device hip::hipcub rocthrust
     PUBLIC_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/Detectors/TRD/base/src
                                ${CMAKE_SOURCE_DIR}/Detectors/Base/src
     TARGETVARNAME targetName)
@@ -46,7 +50,7 @@ if(ALIGPU_BUILD_TYPE STREQUAL "ALIROOT")
   # Add a library to the project using the specified source files
   add_library_tested(Ali${MODULE} SHARED ${SRCS} G__Ali${MODULE}.cxx)
   # HIP run-time and driver
-  target_link_libraries(Ali${MODULE} AliGPUTracking)
+  target_link_libraries(Ali${MODULE} PUBLIC AliGPUTracking)
 
   # Additional compilation flags
   set_target_properties(Ali${MODULE} PROPERTIES COMPILE_FLAGS "")
@@ -61,6 +65,7 @@ endif()
 if(ALIGPU_BUILD_TYPE STREQUAL "Standalone")
   add_definitions(-DGPUCA_GPULIBRARY=HIP)
   add_library(${MODULE} SHARED ${SRCS})
+  target_link_libraries(${MODULE} GPUTracking)
   set(targetName "${MODULE}")
   install(TARGETS GPUTrackingHIP)
 endif()
@@ -70,7 +75,8 @@ if(HIP_AMDGPUTARGET)
 endif()
 
 target_compile_options(${targetName}
-                       PUBLIC -Wno-unused-command-line-argument
+                       PUBLIC -Wno-invalid-command-line-argument
+                              -Wno-unused-command-line-argument
                               -Wno-invalid-constexpr
                               -Wno-ignored-optimization-argument
                               -Wno-unused-private-field)

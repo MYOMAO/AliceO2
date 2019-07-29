@@ -51,7 +51,7 @@ namespace gpu
 #endif
 
 #ifdef __OPENCL__
-MEM_CLASS_PRE()
+MEM_CLASS_PRE() // Macro with some template magic for OpenCL 1.2
 #endif
 class GPUTPCTrack;
 class GPUTPCHitId;
@@ -70,7 +70,8 @@ class GPUDataTypes
                               CPU = 1,
                               CUDA = 2,
                               HIP = 3,
-                              OCL = 4 };
+                              OCL = 4,
+                              OCL2 = 5 };
   enum ENUM_CLASS RecoStep { TPCConversion = 1,
                              TPCSliceTracking = 2,
                              TPCMerging = 4,
@@ -99,6 +100,7 @@ class GPUDataTypes
 #ifdef GPUCA_NOCOMPAT_ALLOPENCL
 struct GPURecoStepConfiguration {
   GPUDataTypes::RecoStepField steps = 0;
+  GPUDataTypes::RecoStepField stepsGPUMask = GPUDataTypes::RecoStep::AllRecoSteps;
   GPUDataTypes::InOutTypeField inputs = 0;
   GPUDataTypes::InOutTypeField outputs = 0;
 };
