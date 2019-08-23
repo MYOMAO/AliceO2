@@ -642,7 +642,7 @@ class RawPixelReader : public PixelReader
   {
     // distribute data from the single buffer among the links caches
 
-    LOG(INFO) << "Caching links data, currently in cache: " << mMinTriggersCached << " triggers";
+	// LOG(INFO) << "Caching links data, currently in cache: " << mMinTriggersCached << " triggers";
     auto nRead = loadInput(buffer);
     if (buffer.isEmpty()) {
       return nRead;
@@ -747,7 +747,7 @@ class RawPixelReader : public PixelReader
         }
       }
     }
-    LOG(INFO) << "Cached at least " << mMinTriggersCached << " triggers on " << mNLinks << " links of " << mNRUs << " RUs";
+   // LOG(INFO) << "Cached at least " << mMinTriggersCached << " triggers on " << mNLinks << " links of " << mNRUs << " RUs";
 
     return nRead;
   }
