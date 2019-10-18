@@ -92,6 +92,7 @@ namespace o2
 			int IndexPush;
 			int PixelSize;
 			std::vector<int> NDigits;
+			std::vector<int> NDigits2;	
 			std::vector<std::string> FolderNames;
 			std::vector<std::vector<std::string>> FileNames;
 			std::string workdir;
@@ -111,6 +112,7 @@ namespace o2
 			std::array<unsigned int,NError> Error;
 			int pos;
 			int j;
+			int j2;
 			std::vector<std::array<unsigned int,NError>> ErrorVec;
 			std::vector<std::string>  NewNextFold;
 			int FileDone;
@@ -132,7 +134,9 @@ namespace o2
 			std::chrono::time_point<std::chrono::high_resolution_clock> end;
 			int difference;
 			int Printed;
-			
+		
+			int MaxEventNoCrash = 10000000;
+
 			//Immediate Injection Variables//
 
 			int NewFileInj;
@@ -141,6 +145,7 @@ namespace o2
 			std::vector<o2::itsmft::Digit> mMultiDigitsTest;
 			std::vector<std::array<unsigned int,NError>> ErrorVecTest;	
 			int MaxPixelSize;
+			int EmptyCount;
 		};
 
 		/// create a processor spec

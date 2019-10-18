@@ -99,6 +99,7 @@ namespace o2
 			LOG(INFO) << "numOfChips = " << numOfChips;
 			setNChips (numOfChips);	
 			j = 0;
+			j2 = 0;
 			FileDone = 1;
 			PercentDone = 0.0;
 			FileRemain = 0;
@@ -108,6 +109,7 @@ namespace o2
 			differenceDecoder = 0;
 			NewFileInj = 1;
 			MaxPixelSize = 58700095;
+			EmptyCount = 0;
 		}
 
 
@@ -138,11 +140,11 @@ namespace o2
 				//cout << "Now FDN File Size = " << NowFileNames[i].size() << endl;
 
 
-				for(int j = 0; j < NowFileNames[i].size(); j++){
+				//for(int j = 0; j < NowFileNames[i].size(); j++){
 
 					//	cout << "Now FDN File = " << NowFileNames[i][j] << endl;
 
-				}
+				//}
 
 			}
 
@@ -194,12 +196,26 @@ namespace o2
 
 
 			LOG(INFO) << "Get IN LOOP";
+		
+
 			for(int i = 0;  i < FolderNames.size(); i++){
+ 		                cout << "i = " << i <<  "   FileNames[i].size()  "<<  FileNames[i].size() << endl;
+			
+				if(FileNames[i].size() > 0){
+
+			//	cout << "Start Comparison" << endl;
 				std::set_difference(NowFileNames[i].begin(), NowFileNames[i].end(), FileNames[i].begin(), FileNames[i].end(),std::inserter(DiffFileNamePush, DiffFileNamePush.begin()));
 				DiffFileNames.push_back(DiffFileNamePush);
 				cout << "Difference File Size Between New and Initial Runs " <<   DiffFileNames[i].size() << endl;
-
 				DiffFileNamePush.clear();
+				
+				}
+			
+				
+				if(FileNames[i].size() == 0)	EmptyCount = EmptyCount + 1;
+				
+			//	cout << "EmptyCount = " << EmptyCount << endl;
+
 			}
 
 			LOG(INFO) << "DONE GRABING Existing";
@@ -219,10 +235,12 @@ namespace o2
 				cout << "STARTED CLOCK" << endl;
 			}
 
-			for(int i = FolderNames.size();  i < NowFolderNames.size(); i++){
+			for(int i = FolderNames.size() - EmptyCount;  i < NowFolderNames.size(); i++){
 				DiffFileNames.push_back(NowFileNames[i]);
 				cout << "New File Size Between New and Initial Runs " <<   DiffFileNames[i].size() << endl;
 			}	
+
+			EmptyCount = 0; 
 
 			LOG(INFO) << "Total New Files = " << DiffFileNames.size();
 
@@ -359,7 +377,8 @@ namespace o2
 						TotalPixelSize = TotalPixelSize + PixelSize;
 
 
-						if(NEvent > (EventRegistered + 1) * EventPerPush){
+						if(NEvent > (EventRegistered + 1) * EventPerPush && NEvent < MaxEventNoCrash -1 ){
+							cout << "Pushing in the first vector" << endl;
 
 							if(TotalPixelSize < MaxPixelSize || TotalPixelSize == MaxPixelSize){
 								cout << "Digit OK for 1 Push" << endl;
@@ -382,6 +401,34 @@ namespace o2
 
 							TotalPixelSize = 0;
 						}
+
+
+
+						if(NEvent > (EventRegistered + 1) * EventPerPush  && NEvent > MaxEventNoCrash - 1){
+							cout << "Pushing in the second vector" << endl;
+
+							if(TotalPixelSize < MaxPixelSize || TotalPixelSize == MaxPixelSize){
+								cout << "Digit OK for 1 Push" << endl;
+								NDigits2.push_back(TotalPixelSize);
+								EventRegistered = EventRegistered + 1;
+								ErrorVec.push_back(Error);
+								cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed"  << endl; 
+							}
+
+							if(TotalPixelSize > MaxPixelSize){
+								cout << "Digit Spilt into 2 Pusbhes" << endl;
+								NDigits2.push_back(TotalPixelSize/2);
+								NDigits2.push_back(TotalPixelSize/2);
+								ErrorVec.push_back(Error);
+								ErrorVec.push_back(Error);
+								EventRegistered = EventRegistered + 1;
+								cout << "TotalPixelSize = " << TotalPixelSize << "  Pushed"  << endl; 
+							}
+
+
+							TotalPixelSize = 0;
+						}
+
 
 						if (NEvent%1000000==0 && TimePrint == 0){
 							cout << "Event Number = " << NEvent   << endl;
@@ -445,7 +492,7 @@ namespace o2
 
 
 					cout << "Final TotalPixelSize = " << TotalPixelSize << endl; 
-					NDigits.push_back(TotalPixelSize);
+					NDigits2.push_back(TotalPixelSize);
 					ErrorVec.push_back(Error);
 					LOG(INFO) <<"Run " << NowFolderNames[i] << " File " << inpName  <<  "    Integrated Raw Pixel Pushed " << mDigits.size();
 					if(FolderNames.size() < NowFolderNames.size()) FileNames.push_back(NewNextFold);
@@ -469,12 +516,15 @@ namespace o2
 			if(mDigits.size() > 0) PercentDone = double(IndexPush)/double(mDigits.size());
 			cout<< "Percentage Processed = " << Form("%.2f",100.*PercentDone) << endl;
 
+			
+			cout << "First Vec Size = " << NDigits.size() << "   Second Vec Size = " << NDigits2.size() << endl;
 
 
-
-			if(IndexPush < mDigits.size()){
+			if(IndexPush < mDigits.size() && j != NDigits.size()){
+					LOG(INFO) << "INSIDE THE FIRST VECTOR ";
 				for(int i = 0; i < NDigits[j]; i++){
 					mMultiDigits.push_back(mDigits[IndexPush + i]);
+				//	cout << "Vectcor  SIZE = " <<  mMultiDigits.size() << endl;
 				}
 				LOG(INFO) << "j = " << j << "   NDgits = " << NDigits[j]  << "    mMultiDigits Pushed = " << mMultiDigits.size();
 				LOG(INFO) << "i = " << 10 << "  ErrorShould = " << Error[10] << "  ErrorInjected = " << ErrorVec[j][10];;
@@ -507,6 +557,53 @@ namespace o2
 				IndexPush = IndexPush + NDigits[j];
 				j = j + 1;
 			}
+
+
+			cout << "j after loop = " << j << endl;
+
+
+			if(IndexPush < mDigits.size() && j == NDigits.size()){
+				LOG(INFO) << "INSIDE THE SECOND VECTOR ";
+				for(int i = 0; i < NDigits2[j2]; i++){
+					mMultiDigits.push_back(mDigits[IndexPush + i]);
+				//	cout << "Vectcor  SIZE = " <<  mMultiDigits.size() << endl;
+				
+				}
+				
+				LOG(INFO) << "j2 = " << j2 << "   NDgits = " << NDigits2[j2]  << "    mMultiDigits Pushed = " << mMultiDigits.size();
+				LOG(INFO) << "i = " << 10 << "  ErrorShould = " << Error[10] << "  ErrorInjected = " << ErrorVec[j][10];;
+
+
+				cout << "RunIDS = " << RunName << "   FileIDS = " << FileID << endl;
+
+				pc.outputs().snapshot(Output{ "TST", "Run", 0, Lifetime::Timeframe }, RunName);
+				pc.outputs().snapshot(Output{ "TST", "File", 0, Lifetime::Timeframe }, FileID);
+
+				pc.outputs().snapshot(Output{ "TST", "Error", 0, Lifetime::Timeframe }, ErrorVec[j]);
+				IndexPushEx =  IndexPush + NDigits2[j2];
+				LOG(INFO) << "IndexPushEx = " << IndexPushEx << "  mDigits.size() " <<  mDigits.size();
+				if(IndexPushEx >  mDigits.size() - 5) FileDone = 1;
+				LOG(INFO) << "FileDone = " << FileDone;
+				LOG(INFO) << "FileRemain = " << FileRemain;
+
+				FileInfo = FileDone + FileRemain * 10;
+
+				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileInfo);
+
+
+				LOG(INFO) << "IndexPush = " << IndexPush << "    Chip ID Pushing " << mDigits[IndexPush].getChipIndex();
+
+
+				//	pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mDigits[IndexPush++]);
+				pc.outputs().snapshot(Output{ "ITS", "DIGITS", 0, Lifetime::Timeframe }, mMultiDigits);
+
+				mMultiDigits.clear();
+				IndexPush = IndexPush + NDigits2[j2];
+				j2 = j2 + 1;
+			}
+
+
+
 
 
 
@@ -553,6 +650,7 @@ namespace o2
 				IndexPush = 0;
 				j = 0;
 				NDigits.clear();
+				NDigits2.clear();
 				FileDone = 1;
 				pc.outputs().snapshot(Output{ "TST", "Finish", 0, Lifetime::Timeframe }, FileDone);	
 				PercentDone = 0;

@@ -47,7 +47,9 @@ AlgorithmSpec adaptFromTask(Args&&... args)
 {
   auto task = std::make_shared<T>(std::forward<Args>(args)...);
   return AlgorithmSpec::InitCallback{ [task](InitContext& ic) {
+	LOG(INFO) << "BEFORE TASK(RUNNER) INIT BRO";  
     task->init(ic);
+	LOG(INFO) << "AFTER TASK(RUNNER) INIT BRO";  	
     return [task](ProcessingContext& pc) {
       task->run(pc);
     };
